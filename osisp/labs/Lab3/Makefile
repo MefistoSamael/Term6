@@ -21,15 +21,15 @@ clean :
 tests : SimpleTest NewLineTest
 
 SimpleTest :
-	@echo "12345 " > ./input.bin
-	@echo "54321" > $(PREF_TEST)answer.bin
-	@./BufferInversion $(PREF_TEST)output.bin
+	@echo "12345" > $(PREF_TEST)input.bin
+	@echo "\n54321" > $(PREF_TEST)answer.bin
+	@./BufferInversion $(PREF_TEST)input.bin $(PREF_TEST)output.bin
 	@diff $(PREF_TEST)output.bin $(PREF_TEST)answer.bin
 	@rm $(PREF_TEST)*.bin
 
 NewLineTest :
-	@echo "123\n456" > ./input.bin
-	@echo "654\n321" > $(PREF_TEST)answer.bin
-	@./BufferInversion $(PREF_TEST)output.bin
-	@diff $(PREF_TEST)output.bin $(PREF_TEST)answer_1.bin
+	@echo "123\n456" > $(PREF_TEST)input.bin
+	@echo "\n654\n321" > $(PREF_TEST)answer.bin
+	@./BufferInversion $(PREF_TEST)input.bin $(PREF_TEST)output.bin
+	@diff $(PREF_TEST)output.bin $(PREF_TEST)answer.bin
 	@rm $(PREF_TEST)*.bin

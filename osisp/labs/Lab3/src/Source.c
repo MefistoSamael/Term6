@@ -7,26 +7,32 @@
 
 int main(int argc, char* argv[]) {
     bool IsFileOutput = false;
-    char* fileName = NULL;
-    if (argc == 2)
-    {
-        fileName = argv[1];
+    char* inputFileName = NULL;
+    char* outputFileName = NULL;
+
+    if (argc == 2) {
+        inputFileName = argv[1];
+    } else if (argc == 3) {
         IsFileOutput = true;
+        inputFileName = argv[1];
+        outputFileName = argv[2];
+    } else {
+        fprintf(stderr, "Usage: %s <output_inputFileName>\n", argv[0]);
+        return 1;
     }
 
     FILE* inputFile, * outputFile = NULL;
     unsigned char buffer[BUFFER_SIZE];
     size_t bytesRead;
 
-    inputFile = fopen("input.bin", "rb");
+    inputFile = fopen(inputFileName, "rb");
     if (inputFile == NULL) {
         perror("Error opening input file");
         return 1;
     }
 
-    if (IsFileOutput)
-    {
-        outputFile = fopen(fileName, "wb");
+    if (IsFileOutput) {
+        outputFile = fopen(outputFileName, "wb");
 
         if (outputFile == NULL) {
             perror("Error opening output file");
@@ -35,7 +41,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // ×èòàåì äàííûå áëîêàìè è èíâåðòèðóåì ïîðÿäîê áàéòîâ
+    // Ð˜Ð½Ð²ÐµÑ€Ñ‚Ð¸Ñ€ÑƒÐµÐ¼ Ð±Ð°Ð¹Ñ‚Ñ‹ Ð¸ Ð·Ð°Ð¿Ð¸ÑÑ‹Ð²Ð°ÐµÐ¼ Ð² Ð²Ñ‹Ñ…Ð¾Ð´Ð½Ð¾Ð¹ Ñ„Ð°Ð¹Ð» Ð¸Ð»Ð¸ stdout
     while ((bytesRead = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, inputFile)) > 0) {
         invertBytes(buffer, bytesRead);
         if (IsFileOutput)
@@ -43,14 +49,15 @@ int main(int argc, char* argv[]) {
         else
             fwrite(buffer, sizeof(unsigned char), bytesRead, stdout);
     }
-
-    if (IsFileOutput)
-    {
+    
+    fputc('\n', outputFile);
+    
+    if (IsFileOutput) {
         fclose(outputFile);
     }
-    
 
     fclose(inputFile);
 
     return 0;
 }
+
