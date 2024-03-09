@@ -1,0 +1,15 @@
+/* ---
+original expression: 3** / *3 = 3* ('*' is any digit)
+goal: all correct combination
+transformed expression: 3* * *3 = 3**
+variables: x * y = z
+--- */
+for (i=0; i<=9; ++i) {
+	for (j=0; j<=9; ++j) {
+		x = 30 + i
+		y = 10*j + 3
+		z = x * y
+		if ((z>=300)&&(z<=399)) print z, ":", y, " = ", x, "\n"
+	}
+}
+quit
