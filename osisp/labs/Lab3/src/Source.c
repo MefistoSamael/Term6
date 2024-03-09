@@ -1,8 +1,9 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "inverter.h"
-#define BUFFER_SIZE 1024 // Определяем размер буфера для чтения
+#define BUFFER_SIZE 1024
 
 int main(int argc, char* argv[]) {
     bool IsFileOutput = false;
@@ -44,7 +45,9 @@ int main(int argc, char* argv[]) {
     }
 
     if (IsFileOutput)
+    {
         fclose(outputFile);
+    }
     
 
     fclose(inputFile);
