@@ -15,7 +15,7 @@ $(PREF_OBJ)%.o : $(PREF_SRC)%.c
 	$(CC) -c $< -o $@
 
 clean :
-	rm $(TARGET) $(PREF_OBJ)*.o
+	rm $(PREF_OBJ)*.o
 	rm $(PREF_TEST)*.bin
 
 tests : SimpleTest NewLineTest

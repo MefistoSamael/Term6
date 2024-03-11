@@ -50,7 +50,11 @@ int main(int argc, char* argv[]) {
             fwrite(buffer, sizeof(unsigned char), bytesRead, stdout);
     }
     
-    fputc('\n', outputFile);
+    //fwrite("\n", strlen("\n"), 1, outputFile);
+    if (IsFileOutput)
+    	fputc('\n', outputFile);
+    else
+    	fputc('\n', stdout);
     
     if (IsFileOutput) {
         fclose(outputFile);
