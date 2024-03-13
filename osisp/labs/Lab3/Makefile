@@ -1,35 +1,33 @@
 TARGET = BufferInversion
 CC = gcc
 
-PREF_SRC = ./src/
-PREF_OBJ = ./obj/
-PREF_TEST = ./tests/
+Source_Folder = ./src/
+Object_Folder = ./obj/
+Test_Folder = ./tests/
 
-SRC = $(wildcard $(PREF_SRC)*.c)
-OBJ = $(patsubst $(PREF_SRC)%.c, $(PREF_OBJ)%.o, $(SRC))
+SRC = $(wildcard $(Source_Folder)*.c)
 
-$(TARGET) : $(OBJ)
-	$(CC) $(OBJ) -o $(TARGET)
+$(TARGET) : ./obj/Inverter.o ./obj/Source.o
+	$(CC) ./obj/Inverter.o ./obj/Source.o -o $(TARGET)
 
-$(PREF_OBJ)%.o : $(PREF_SRC)%.c
+$(Object_Folder)%.o : $(Source_Folder)%.c
 	$(CC) -c $< -o $@
 
 clean :
-	rm $(PREF_OBJ)*.o
-	rm $(PREF_TEST)*.bin
+	@rm $(wildcard $(Object_Folder)*.o)
 
 tests : SimpleTest NewLineTest
 
 SimpleTest :
-	@echo "12345" > $(PREF_TEST)input.bin
-	@echo "\n54321" > $(PREF_TEST)answer.bin
-	@./BufferInversion $(PREF_TEST)input.bin $(PREF_TEST)output.bin
-	@diff $(PREF_TEST)output.bin $(PREF_TEST)answer.bin
-	@rm $(PREF_TEST)*.bin
+	@echo "12345" > $(Test_Folder)input.bin
+	@echo "\n54321" > $(Test_Folder)answer.bin
+	@./BufferInversion $(Test_Folder)input.bin $(Test_Folder)output.bin
+	@diff $(Test_Folder)output.bin $(Test_Folder)answer.bin
+	@rm $(Test_Folder)*.bin
 
 NewLineTest :
-	@echo "123\n456" > $(PREF_TEST)input.bin
-	@echo "\n654\n321" > $(PREF_TEST)answer.bin
-	@./BufferInversion $(PREF_TEST)input.bin $(PREF_TEST)output.bin
-	@diff $(PREF_TEST)output.bin $(PREF_TEST)answer.bin
-	@rm $(PREF_TEST)*.bin
+	@echo "123\n456" > $(Test_Folder)input.bin
+	@echo "\n654\n321" > $(Test_Folder)answer.bin
+	@./BufferInversion $(Test_Folder)input.bin $(Test_Folder)output.bin
+	@diff $(Test_Folder)output.bin $(Test_Folder)answer.bin
+	@rm $(Test_Folder)*.bin
