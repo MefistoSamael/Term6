@@ -92,14 +92,14 @@ namespace Lab3
             };
         }
 
-        public static IEnumerable<NetworkSegment> GetPackets(byte[] data, ushort windowsSize, int sourcePort, int destinationPort, uint seqNum, uint ackNum)
+        public static IEnumerable<NetworkSegment> GetSegments(byte[] data, ushort windowsSize, int sourcePort, int destinationPort, uint seqNum, uint ackNum)
         {
-            List<NetworkSegment> packets = new();
+            List<NetworkSegment> segments = new();
             int id = 0;
 
             do
             {
-                packets.Add(new NetworkSegment()
+                segments.Add(new NetworkSegment()
                 {
                     SourcePort = sourcePort,
                     DestinationPort = destinationPort,
@@ -113,7 +113,7 @@ namespace Lab3
             }
             while ((id += windowsSize) < data.Length);
 
-            return packets;
+            return segments;
         }
 
 
@@ -121,11 +121,11 @@ namespace Lab3
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("\n" +
-                "================\n" +
+                "*****************\n" +
                 "Ports: [SrcPort: {0}, DestPort: {1}]" +
                 "\nSeqNum: {2}, AckNum: {3}\n" +
                 "Flags: [SYN: {4}, ACK: {5}, RST: {6}, FIN:{7}]\nWinSize: {8}\nDataLength: {9}\n" +
-                "================",
+                "*****************",
                 SourcePort, DestinationPort, SequenceNumber, AcknowledgmentNumber, SYNFlag, ACKFlag, RSTFlag, FINFlag, WindowSize, Data.Length);
             return sb.ToString();
         }

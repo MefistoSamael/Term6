@@ -12,44 +12,41 @@ namespace Lab3
 
         public Task ConnectToServer(IPEndPoint serverIP, CancellationTokenSource cancelTokenSource)
         {
-            //Создаем сокет и привязывааем к конкретному адресу
             Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             clientSocket.Bind(_ip);
+            
 
             try
             {
-                //Подключаемся к серверу
                 clientSocket.Connect(serverIP);
 
 
-                //Наачинаем отправлять пакеты для подтверждения соединения
-                SendPacket(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, serverIP.Port, 0, 0, syn: true)); 
+                SendSegment(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, serverIP.Port, 0, 0, syn: true)); 
                 
-                NetworkSegment packet = ReadPacket(clientSocket);
+                NetworkSegment segment = ReadSegment(clientSocket);
 
-                if (!packet.SYNFlag || !packet.ACKFlag)
-                    throw new Exception("Incorrect initial packet from server");
+                if (!segment.SYNFlag || !segment.ACKFlag)
+                    throw new Exception("Incorrect initial segment from server");
 
-                SendPacket(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, serverIP.Port, 1, 1, ack: true));
+                SendSegment(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, serverIP.Port, 1, 1, ack: true));
 
-                //Подключение установлено. Теперь читаем сообщение
 
                 StringBuilder serverMessage = new();
 
-                packet = ReadPacket(clientSocket);
+                segment = ReadSegment(clientSocket);
                 do
                 {
-                    serverMessage.Append(packet.Data.Utf32BytesToString());
+                    serverMessage.Append(segment.Data.Utf32BytesToString());
 
-                    Thread.Sleep(200);
-                    SendPacket(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, serverIP.Port, 1, packet.SequenceNumber + (uint)packet.Data.Length, ack: true));
-                    packet = ReadPacket(clientSocket);
+                    Thread.Sleep(10);
+                    SendSegment(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, serverIP.Port, 1, segment.SequenceNumber + (uint)segment.Data.Length, ack: true));
+                    segment = ReadSegment(clientSocket);
                 }
-                while (!packet.FINFlag);
+                while (!segment.FINFlag);
 
-                Console.WriteLine("\n======================================\n" +
+                Console.WriteLine("\n\n\n" +
                                   "Message received from server: " + serverMessage +
-                                  "\n======================================\n");
+                                  "\n\n\n");
             }
             catch (Exception ex)
             {
@@ -58,30 +55,30 @@ namespace Lab3
             finally
             {
                 if (clientSocket.Connected)
-                    clientSocket.Close();
+                    clientSocket.Disconnect(false);
+
+                clientSocket.Close();
             }
 
             cancelTokenSource.Cancel();
             return Task.CompletedTask;
         }
 
-        private void SendPacket(Socket socket, NetworkSegment packet)
+        private void SendSegment(Socket socket, NetworkSegment segment)
         {
-            byte[] responseBuffer = packet.ToJsonBytes();
+            byte[] responseBuffer = segment.ToJsonBytes();
             socket.Send(responseBuffer);
         }
 
-        public NetworkSegment ReadPacket(Socket socket)
+        public NetworkSegment ReadSegment(Socket socket)
         {
-            // Буфер для хранения данных
             byte[] messageBuffer = new byte[4096];
             List<byte> res = new();
 
-            // Читаем данные из клиента
             int bytesRead = socket.Receive(messageBuffer);
             res.AddRange(messageBuffer[0..bytesRead]);
 
-            return res.ToArray().DeserializeTcpPacket();
+            return res.ToArray().DeserializeTcpSegment();
         }
     }
 }

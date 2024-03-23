@@ -12,9 +12,9 @@ namespace Lab3
 
     public static class Extensions
     {
-        public static byte[] ToJsonBytes(this NetworkSegment packet)
+        public static byte[] ToJsonBytes(this NetworkSegment segment)
         {
-            string jsonString = JsonSerializer.Serialize(packet);
+            string jsonString = JsonSerializer.Serialize(segment);
             return Encoding.UTF32.GetBytes(jsonString);
         }
 
@@ -33,7 +33,7 @@ namespace Lab3
             return Encoding.UTF32.GetString(bytes);
         }
 
-        public static NetworkSegment DeserializeTcpPacket(this byte[] data)
+        public static NetworkSegment DeserializeTcpSegment(this byte[] data)
         {
             string json = data.Utf32BytesToString();
             return JsonSerializer.Deserialize<NetworkSegment>(json) ?? throw new JsonException("Deserialization failed.");

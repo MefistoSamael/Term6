@@ -8,8 +8,7 @@ namespace Lab3
         public async Task ConnectToServer(IPEndPoint clientIP, CancellationToken token)
         {
             await Task.Delay(500);
-
-            //SynFloodAttack();
+            SynFloodAttack();
             //ResetAttack(token);
         }
 
@@ -21,16 +20,15 @@ namespace Lab3
             {
                 clientSocket.Connect(NetworkNode.ServerIP);
 
-                SendPacket(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, NetworkNode.ServerIP.Port, 0, 0, syn: true));
+                SendSegment(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, NetworkNode.ServerIP.Port, 0, 0, syn: true));
 
-                NetworkSegment packet = ReadPacket(clientSocket);
+                NetworkSegment segment = ReadSegment(clientSocket);
 
-                if (!packet.SYNFlag || !packet.ACKFlag)
+                if (!segment.SYNFlag || !segment.ACKFlag)
                     throw new Exception("Incorrect first packer from server");
 
-                SendPacket(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, NetworkNode.ServerIP.Port, 1, 1, ack: true));
+                SendSegment(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, NetworkNode.ServerIP.Port, 1, 1, ack: true));
 
-                //Подключение установлено. Теперь пытаемся разорвать соединение
 
                 for(int i = 5; i < 100; i++)
                 {
@@ -40,8 +38,7 @@ namespace Lab3
                     Thread.Sleep(100);
                     try
                     {
-                        //Отправляем пакеты с флагом RST и подставляем порт нашего клиента, типа это он отправил
-                        SendPacket(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, NetworkNode.ServerIP.Port, (uint)i * 4 + 1, 1, rst: true, ack: true));
+                        SendSegment(clientSocket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, NetworkNode.ServerIP.Port, (uint)i * 4 + 1, 1, rst: true, ack: true));
                     }
                     catch { }
                 }
@@ -49,7 +46,6 @@ namespace Lab3
             catch (Exception ex)
             {
                 Console.WriteLine($"Error occured while intruder worked with server: {ex.Message}");
-                //throw;
             }
             finally
             {
@@ -58,7 +54,6 @@ namespace Lab3
             }
         }
 
-        //Просто спамим сообщениями о том, что хотим подключиться
         private void SynFloodAttack()
         {
             Parallel.For(5, 20, (int i) =>
@@ -68,30 +63,28 @@ namespace Lab3
                     Socket socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     socket.Connect(NetworkNode.ServerIP);
 
-                    SendPacket(socket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, 1000 + i, 0, 0, syn: true));
+                    SendSegment(socket, NetworkSegment.CreateEmptySegment(4, Constants.ClientPort, 1000 + i, 0, 0, syn: true));
                 }
                 catch { }
             });
         }
 
-        private void SendPacket(Socket socket, NetworkSegment packet)
+        private void SendSegment(Socket socket, NetworkSegment segment)
         {
-            byte[] responseBuffer = packet.ToJsonBytes();
+            byte[] responseBuffer = segment.ToJsonBytes();
             socket.Send(responseBuffer);
         }
 
-        public NetworkSegment ReadPacket(Socket socket)
+        public NetworkSegment ReadSegment(Socket socket)
         {
-            // Буфер для хранения данных
             byte[] messageBuffer = new byte[4096];
             List<byte> res = new();
             int bytesRead;
 
-            // Читаем данные из клиента
             bytesRead = socket.Receive(messageBuffer);
             res.AddRange(messageBuffer[0..bytesRead]);
 
-            return res.ToArray().DeserializeTcpPacket();
+            return res.ToArray().DeserializeTcpSegment();
         }
     }
 }
