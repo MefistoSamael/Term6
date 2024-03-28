@@ -11,13 +11,13 @@ def MySimplexMethodMainPhase(c: np.ndarray, x: np.ndarray, A: np.ndarray, B: np.
     iteration = 1
     
     while True:
-        print(f'-----------ITERATION N{iteration}---------------')
+        #print(f'-----------ITERATION N{iteration}---------------')
         #step 1
         A_B = A[:, np.array(B) - 1]
         
-        print ('A base')
-        print (A_B)
-        print('\n')
+        #print ('A base')
+        #print (A_B)
+        #print('\n')
         
         if Is_First_Lap:
             A_I_B= np.linalg.inv(A_B)
@@ -25,52 +25,52 @@ def MySimplexMethodMainPhase(c: np.ndarray, x: np.ndarray, A: np.ndarray, B: np.
             A_I_B= MyMatrixInversion(A_I_B, new_column, new_index)
         
         if (A_I_B is None):
-            print('couldnt inverse matrix')
+            #print('couldnt inverse matrix')
             return
         
-        print('A base inverted')
-        print(A_I_B)
-        print('\n')
+        #print('A base inverted')
+        #print(A_I_B)
+        #print('\n')
             
         #step 2
         c_B = c[np.array(B) - 1]
         
-        print('c with base indexes')
-        print(c_B)
-        print('\n')
+        #print('c with base indexes')
+        #print(c_B)
+        #print('\n')
         
         #step 3
         u = c_B.dot(A_I_B)
         
-        print('u')
-        print(u)
-        print('\n')
+        #print('u')
+        #print(u)
+        #print('\n')
         
         #step 4
         delta = u.dot(A) - c
         
-        print('estimates vector')
-        print(delta)
-        print('\n')
+        #print('estimates vector')
+        #print(delta)
+        #print('\n')
         
         #step 5
         if np.all(delta >= 0):
-            print('found optimal plan')
-            return x
+            #print('found optimal plan')
+            return x, B
         
         #step 6
         j0 = (delta < 0).argmax() + 1
         
-        print('index of first negative number')
-        print(j0)
-        print('\n')
+        #print('index of first negative number')
+        #print(j0)
+        #print('\n')
         
         #step 7
         z = A_I_B.dot(A[:,j0 - 1])
         
-        print('z')
-        print(z)
-        print('\n')
+        #print('z')
+        #print(z)
+        #print('\n')
         
         #step 8-9(didn't create whole vector because it's unnecessary)
         teta0 = inf
@@ -83,24 +83,24 @@ def MySimplexMethodMainPhase(c: np.ndarray, x: np.ndarray, A: np.ndarray, B: np.
                 teta0
             
         
-        print('teta0')
-        print(teta0)
-        print('\n')
+        #print('teta0')
+        #print(teta0)
+        #print('\n')
         
         #step 10
         if teta0 == inf:
-            print('objective function is not limited from above on a set of acceptable plans')
+            #print('objective function is not limited from above on a set of acceptable plans')
             return
         
         #step 11
         j_Star = B[k-1]
         
-        print('k')
-        print(k)
-        print('\n')
-        print('j_Star')
-        print(j_Star)
-        print('\n')
+        #print('k')
+        #print(k)
+        #print('\n')
+        #print('j_Star')
+        #print(j_Star)
+        #print('\n')
         
         #step 12
         B[k-1] = j0
@@ -111,9 +111,9 @@ def MySimplexMethodMainPhase(c: np.ndarray, x: np.ndarray, A: np.ndarray, B: np.
             
         x[j_Star - 1] = 0
         x[j0 - 1] = teta0
-        print('x')
-        print(x)
-        print('\n')
+        #print('x')
+        #print(x)
+        #print('\n')
             
         
         

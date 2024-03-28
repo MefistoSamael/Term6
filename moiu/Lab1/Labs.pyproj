@@ -26,6 +26,7 @@
   <ItemGroup>
     <Compile Include="Lab1.py" />
     <Compile Include="Lab2.py" />
+    <Compile Include="Lab3.py" />
     <Compile Include="main.py" />
   </ItemGroup>
   <ItemGroup>

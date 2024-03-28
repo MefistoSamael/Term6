@@ -1,17 +1,18 @@
 import numpy as np
-from Lab2 import MySimplexMethodMainPhase
+from Lab3 import MySimplexMethodStartPhase
 
 
 
 if __name__ == "__main__":
-    A = np.array([[-1, 1, 1, 0, 0],
-                  [1, 0, 0, 1, 0],
-                  [0, 1, 0, 0, 1]])
+    A = np.array([[1, 1, 1, ],
+                  [2, 2, 2]])
     
-    c = np.array([1, 1, 0, 0, 0])
-    x = np.array([0, 0, 1, 3, 2])
-    B = [3, 4, 5]
+    c = np.array([1, 0, 0])
+    b = np.array([-1, 0])
     
-    result = MySimplexMethodMainPhase(c,x,A,B)
+    x, B, A, b = MySimplexMethodStartPhase(c,A,b)
     
-    print(result)
+    print(x)
+    print(B)
+    print(A)
+    print(b)
