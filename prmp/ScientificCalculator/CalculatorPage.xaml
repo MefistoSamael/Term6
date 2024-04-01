@@ -26,33 +26,6 @@
             Grid.RowSpan="4"
             Grid.ColumnSpan="5"/>
 
-        <!-- Input Area -->
-        <Frame
-            HasShadow="False"
-            Padding="6,0,4,0"
-            Margin="12"
-            BorderColor="{StaticResource PrimaryColor}"
-            BackgroundColor="#2C3240"
-            HorizontalOptions="EndAndExpand"
-            VerticalOptions="EndAndExpand"
-            Grid.Row="0"
-            Grid.Column="0"
-            Grid.ColumnSpan="5">
-            <Label
-                LineHeight="1.5"
-                VerticalTextAlignment="Center"
-                VerticalOptions="Center">
-                <Label.FormattedText>
-                    <FormattedString>
-                        <Span Text="{Binding InputText}" Style="{StaticResource InputBoxLabelStyle}" />
-                        <Span Text="│" FontSize="28" TextColor="{StaticResource PrimaryColor}" Style="{StaticResource InputBoxLabelStyle}" />
-                        <Span Text=" " Style="{StaticResource InputBoxLabelStyle}" />
-                    </FormattedString>
-                </Label.FormattedText>
-            </Label>
-        </Frame>
-
-
         <!-- Answer Row -->
         <Grid            
             ColumnDefinitions="Auto,*"
@@ -68,7 +41,7 @@
                 Margin="16,0"/>
 
             <Label
-                Text="{Binding CalculatedResult, Mode=OneWay}"
+                Text="{Binding Display, Mode=OneWay}"
                 VerticalOptions="Center"
                 VerticalTextAlignment="Center"
                 HorizontalOptions="End"
@@ -87,7 +60,9 @@
             ZIndex="1"
             Margin="6,10,6,4"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="MEAN" />
+            Text="10^"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="10^"/>
 
         <Button
             Grid.Row="2"
@@ -95,7 +70,9 @@
             ZIndex="1"
             Margin="6,10,6,4"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="MOD" />
+            Text="x^Y"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="x^Y"/>
 
         <Button
             Grid.Row="2"
@@ -103,7 +80,9 @@
             ZIndex="1"
             Margin="6,10,6,4"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="STD" />
+            Text="x^3" 
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="x^3"/>
 
         <Button
             Grid.Row="2"
@@ -111,7 +90,9 @@
             ZIndex="1"
             Margin="6,10,6,4"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="VAR" />
+            Text="x^2"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="x^2"/>
 
         <Button
             Grid.Row="2"
@@ -119,7 +100,9 @@
             ZIndex="1"
             Margin="6,10,6,4"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="FACT" />
+            Text="!"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="!"/>
 
 
         <!-- Row 2 -->
@@ -129,8 +112,8 @@
             ZIndex="1"            
             Style="{StaticResource ScientificOperatorButtonStyle}"
             Text="SIN"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="SIN" />
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="sin" />
 
         <Button
             Grid.Row="3"
@@ -138,8 +121,8 @@
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
             Text="COS"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="COS" />
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="cos" />
 
         <Button
             Grid.Row="3"
@@ -147,8 +130,8 @@
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
             Text="TAN"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="TAN" />
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="tan" />
 
         <Button
             Grid.Row="3"
@@ -156,17 +139,17 @@
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
             Text="LOG"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="LOG" />
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="log" />
 
         <Button
             Grid.Row="3"
             Grid.Column="4"
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="EXP"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="EXP" />
+            Text="ln"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="ln" />
 
         <!-- Row 3 -->
         <Button
@@ -174,45 +157,46 @@
             Grid.Column="0"
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="ASIN"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="ASIN" />
+            Text="√"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="√" />
 
         <Button
             Grid.Row="4"
             Grid.Column="1"
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="ACOS"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="ACOS" />
+            Text="∛"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="∛" />
 
         <Button
             Grid.Row="4"
             Grid.Column="2"
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="ATAN"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="ATAN" />
+            Text="n√x"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="∛x" />
 
+        <!--pi-->
         <Button
             Grid.Row="4"
             Grid.Column="3"
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="LOG10"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="LOG10" />
+            Text="π"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="π" />
 
         <Button
             Grid.Row="4"
             Grid.Column="4"
             ZIndex="1"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="POW"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="POW" />
+            Text="rand"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="rand" />
 
         <!-- Row 4 -->
         <Button
@@ -221,9 +205,9 @@
             ZIndex="1"
             Margin="6,4,6,10"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="SQRT"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="SQRT" />
+            Text="1/x"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="1/x" />
 
         <Button
             Grid.Row="5"
@@ -231,9 +215,9 @@
             ZIndex="1"
             Margin="6,4,6,10"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text="ABS"
-            Command="{Binding ScientificOperatorCommand}"
-            CommandParameter="ABS" />
+            Text="e"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="e" />
 
         <Button
             Grid.Row="5"
@@ -241,9 +225,9 @@
             ZIndex="1"
             Margin="6,4,6,10"
             Style="{StaticResource ScientificOperatorButtonStyle}"
-            Text=","
-            Command="{Binding RegionOperatorCommand}"
-            CommandParameter="," />
+            Text="+/-"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="+/-" />
 
         <Button
             Grid.Row="5"
@@ -252,7 +236,7 @@
             Margin="6,4,6,10"
             Style="{StaticResource ScientificOperatorButtonStyle}"
             Text="("
-            Command="{Binding RegionOperatorCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="(" />
 
         <Button
@@ -262,7 +246,7 @@
             Margin="6,4,6,10"
             Style="{StaticResource ScientificOperatorButtonStyle}"
             Text=")"
-            Command="{Binding RegionOperatorCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter=")" />
 
 
@@ -273,31 +257,32 @@
             Grid.Column="3"
             Grid.ColumnSpan="2"
             Style="{StaticResource OperatorButtonStyle}"
-            Text="AC"
-            Command="{Binding ResetCommand}" />
+            Text="C"
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="C"/>
 
         <Button
             Grid.Row="7"
             Grid.Column="3"
             Style="{StaticResource OperatorButtonStyle}"
             Text="×"
-            Command="{Binding MathOperatorCommand}"
-            CommandParameter="×"/>
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="*"/>
 
         <Button
             Grid.Row="7"
             Grid.Column="4"
             Style="{StaticResource OperatorButtonStyle}"
             Text="÷"
-            Command="{Binding MathOperatorCommand}"
-            CommandParameter="÷"/>
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="/"/>
 
         <Button
             Grid.Row="8"
             Grid.Column="3"
             Style="{StaticResource OperatorButtonStyle}"
             Text="+"
-            Command="{Binding MathOperatorCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="+"/>
 
         <Button
@@ -305,7 +290,7 @@
             Grid.Column="4"
             Style="{StaticResource OperatorButtonStyle}"
             Text="-"
-            Command="{Binding MathOperatorCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="-"/>
 
         <Button
@@ -315,7 +300,8 @@
             Style="{StaticResource OperatorButtonStyle}"
             Text="="
             FontSize="28"
-            Command="{Binding CalculateCommand}" />
+            Command="{Binding ReceiveInputCommand}"
+            CommandParameter="="/>
 
 
         <!-- Numbers Input -->
@@ -324,7 +310,7 @@
             Grid.Column="0"
             Style="{StaticResource NumberButtonStyle}"
             Text="7"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="7" />
 
         <Button
@@ -332,7 +318,7 @@
             Grid.Column="1"
             Style="{StaticResource NumberButtonStyle}"
             Text="8"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="8" />
 
         <Button
@@ -340,7 +326,7 @@
             Grid.Column="2"
             Style="{StaticResource NumberButtonStyle}"
             Text="9"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="9" />
 
         <Button
@@ -348,7 +334,7 @@
             Grid.Column="0"
             Style="{StaticResource NumberButtonStyle}"
             Text="4"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="4" />
 
         <Button
@@ -356,7 +342,7 @@
             Grid.Column="1"
             Style="{StaticResource NumberButtonStyle}"
             Text="5"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="5" />
 
         <Button
@@ -364,7 +350,7 @@
             Grid.Column="2"
             Style="{StaticResource NumberButtonStyle}"
             Text="6"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="6" />
 
         <Button
@@ -372,7 +358,7 @@
             Grid.Column="0"
             Style="{StaticResource NumberButtonStyle}"
             Text="1"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="1" />
 
         <Button
@@ -380,7 +366,7 @@
             Grid.Column="1"
             Style="{StaticResource NumberButtonStyle}"
             Text="2"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="2" />
 
         <Button
@@ -388,7 +374,7 @@
             Grid.Column="2"
             Style="{StaticResource NumberButtonStyle}"
             Text="3"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="3" />
 
         <Button
@@ -396,23 +382,16 @@
             Grid.Column="0"
             Style="{StaticResource NumberButtonStyle}"
             Text="0"
-            Command="{Binding NumberInputCommand}"
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="0" />
 
         <Button
             Grid.Row="9"
             Grid.Column="1"
             Style="{StaticResource NumberButtonStyle}"
-            Text="."
-            Command="{Binding NumberInputCommand}"
+            Text=","
+            Command="{Binding ReceiveInputCommand}"
             CommandParameter="." />
-
-        <Button
-            Grid.Row="9"
-            Grid.Column="2"
-            Style="{StaticResource NumberButtonStyle}"
-            Text="⌫"
-            Command="{Binding BackspaceCommand}" />
 
         <!-- Horizontal Border Lines -->
         <BoxView
