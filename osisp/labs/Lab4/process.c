@@ -28,6 +28,7 @@ void signal_handler(int signum)
     else
     {
         printf("Parent process terminates\n");
+        printf("%d", pid);
         exit(0);
     }
 }
