@@ -6,6 +6,18 @@ using System.Numerics;
 
 namespace MauiScientificCalculator.ViewModels;
 
+class CalculatorInternalState
+{
+    public string first;
+    public BinaryOperations firstOp;
+    public string second;
+    public BinaryOperations secondOp;
+    public string trailing;
+    public CalculatorState state;
+    public ToDisplay toDisplay;
+    public bool constantNumberPressed;
+}
+
 [INotifyPropertyChanged]
 #pragma warning disable MVVMTK0032 // Inherit from ObservableObject instead of using [INotifyPropertyChanged]
 internal partial class CalculatorPageViewModel
@@ -25,6 +37,8 @@ internal partial class CalculatorPageViewModel
     const int placesNumber = 45;
 
     bool constantNumberPressed = false;
+
+    Stack<CalculatorInternalState> states = new Stack<CalculatorInternalState>();
 
     public CalculatorPageViewModel()
     {
@@ -51,6 +65,8 @@ internal partial class CalculatorPageViewModel
     [RelayCommand]
     private void ReceiveInput(string input)
     {
+        Display = "zhdi";
+
         if (isNumberInput(input) && !constantNumberPressed)
             HandleNumberInput(input);
         else if (isEqual(input))
@@ -68,7 +84,7 @@ internal partial class CalculatorPageViewModel
             }
         else if (isReset(input))
             HandleReset(input);
-        else if (isBinaryOperation(input))
+        else if (isBinaryOperation(input) && state != CalculatorState.ERROR)
             try
             {
                 HandleBinaryOperation(input);
@@ -94,7 +110,7 @@ internal partial class CalculatorPageViewModel
             {
                 SetToErrorState();
             }
-        else if (isBrace(input))
+        else if (isBrace(input) && state != CalculatorState.ERROR)
             HandleBrace(input);
         else if (constantNumberPressed)
         { }
@@ -153,7 +169,7 @@ internal partial class CalculatorPageViewModel
                 trailing = GetResultingDisplay(trailing, input);
                 break;
             case CalculatorState.ERROR:
-                SetToBaseState();
+                SetToBaseState(true);
                 first = isDecimalPointInput(input) ? "0" + input : input;
                 state = CalculatorState.TRANSITION_FROM_INITIAL;
                 break;
@@ -225,6 +241,10 @@ internal partial class CalculatorPageViewModel
                 return BigDecimal.Round((a * b), placesNumber).ToString();
             case BinaryOperations.Div:
                 return BigDecimal.Round((a / b), placesNumber).ToString();
+            case BinaryOperations.YsPower:
+                return Pow(a, second, b);
+            case BinaryOperations.NthRoot:
+                return NthRoot(a, (int)b);
             default:
                 throw new Exception("Invalid operation for results! BAD");
         }
@@ -245,7 +265,7 @@ internal partial class CalculatorPageViewModel
         switch (state)
         {
             case CalculatorState.INITIAL:
-                SetToBaseState();
+                SetToBaseState(true);
                 return;
             case CalculatorState.TRANSITION_FROM_INITIAL:
                 if (first != "0")
@@ -254,7 +274,7 @@ internal partial class CalculatorPageViewModel
                 }
                 else
                 {
-                    SetToBaseState();
+                    SetToBaseState(true);
                 }
                 break;
             case CalculatorState.TRANSITION:
@@ -268,7 +288,7 @@ internal partial class CalculatorPageViewModel
                 }
                 else
                 {
-                    SetToBaseState();
+                    SetToBaseState(true);
                 }
                 break;
             case CalculatorState.TRAILING:
@@ -282,7 +302,7 @@ internal partial class CalculatorPageViewModel
                 }
                 else
                 {
-                    SetToBaseState();
+                    SetToBaseState(true);
                 }
                 break;
             case CalculatorState.EQUAL:
@@ -290,14 +310,14 @@ internal partial class CalculatorPageViewModel
                 state = CalculatorState.TRANSITION_FROM_INITIAL;
                 break;
             case CalculatorState.ERROR:
-                SetToBaseState();
+                SetToBaseState(true);
                 break;
             default:
                 throw new Exception("Invalid state! BAD.");
         }
     }
 
-    private void SetToBaseState()
+    private void SetToBaseState(bool clearStates)
     {
         first = "0";
         firstOp = BinaryOperations.Plus;
@@ -307,6 +327,8 @@ internal partial class CalculatorPageViewModel
         toDisplay = ToDisplay.FIRST;
         state = CalculatorState.INITIAL;
         constantNumberPressed = false;
+        if (clearStates)
+            states = new();
     }
 
     private bool isBinaryOperation(string input)
@@ -328,11 +350,13 @@ internal partial class CalculatorPageViewModel
                 second = first;
                 firstOp = input_operation;
                 state = CalculatorState.TRANSITION;
+                toDisplay = ToDisplay.SECOND;
                 break;
             case CalculatorState.TRANSITION_FROM_INITIAL:
                 second = first;
                 firstOp = input_operation;
                 state = CalculatorState.TRANSITION;
+                toDisplay = ToDisplay.SECOND;
                 break;
             case CalculatorState.TRANSITION:
                 firstOp = input_operation;
@@ -343,6 +367,7 @@ internal partial class CalculatorPageViewModel
                     // complex operation case: move to TRAILING
                     secondOp = input_operation;
                     trailing = second;
+                    toDisplay = ToDisplay.TRAILING;
                     state = CalculatorState.TRAILING;
                 }
                 else
@@ -406,7 +431,9 @@ internal partial class CalculatorPageViewModel
     private bool isComplexOperation(BinaryOperations input_operation)
     {
         return input_operation == BinaryOperations.Mult ||
-               input_operation == BinaryOperations.Div;
+               input_operation == BinaryOperations.Div ||
+               input_operation == BinaryOperations.YsPower ||
+               input_operation == BinaryOperations.NthRoot;
     }
 
     private bool isSimpleOperation(BinaryOperations input_operation)
@@ -451,6 +478,11 @@ internal partial class CalculatorPageViewModel
                 first = PerfomUnaryOperation(first, input);
                 break;
             case CalculatorState.ERROR:
+                if (input == "π" || input == "e" || input == "rand" || input == "+/-")
+                {
+                    SetToBaseState(true);
+                    first = PerfomUnaryOperation(first, input);
+                }
                 break;
             default:
                 throw new Exception("Invalid state! BAD.");
@@ -495,16 +527,11 @@ internal partial class CalculatorPageViewModel
                 return BigDecimal.Round((1 / decimalOperand), placesNumber).ToString();
                 
             case UnaryOperations.SquareRoot:
-                if (decimalOperand.IsNegative())
-                    throw new InvalidDataException("Error: negative number in square root");
-                return BigDecimal.Round(BigDecimal.SquareRoot(decimalOperand, placesNumber), placesNumber).ToString();
+                return NthRoot(decimalOperand, 2);
                 
             case UnaryOperations.CubeRoot:
                 // No 3throot for negative numbers in BigDecimal
-                if (decimalOperand.IsNegative())
-                    return BigDecimal.Round(BigDecimal.Negate(BigDecimal.NthRoot(BigDecimal.Negate(decimalOperand), 3, placesNumber)), placesNumber).ToString();
-                else
-                    return BigDecimal.Round(BigDecimal.NthRoot(decimalOperand, 3, placesNumber), placesNumber).ToString();
+                return NthRoot(decimalOperand, 3);
                 
             case UnaryOperations.NaturalLogarithm:
                 if (decimalOperand.IsNegative())
@@ -560,6 +587,25 @@ internal partial class CalculatorPageViewModel
 
     }
 
+    private string NthRoot(BigDecimal decimalOperand, int root)
+    {
+        if (root % 2 != 0)
+        {
+            if (decimalOperand.IsNegative())
+                return BigDecimal.Round(BigDecimal.Negate(BigDecimal.NthRoot(BigDecimal.Negate(decimalOperand), root, placesNumber)), placesNumber).ToString();
+            else
+                return BigDecimal.Round(BigDecimal.NthRoot(decimalOperand, root, placesNumber), placesNumber).ToString();
+        }
+        else
+        {
+            if (decimalOperand.IsNegative())
+                throw new InvalidDataException("Negative numver in odd root");
+
+            return BigDecimal.Round(BigDecimal.NthRoot(decimalOperand, root, placesNumber), placesNumber).ToString();
+        }
+        
+    }
+
     private string GetFractionalPart(string number)
     {
         return number.Substring(number.IndexOf(".") + 1);
@@ -567,13 +613,16 @@ internal partial class CalculatorPageViewModel
 
     private string Pow(BigDecimal powBase, string exponent, BigDecimal decimalExponent)
     {
-        if (exponent.Contains("."))
+        if (exponent.IndexOf('.') is int index and not -1)
         {
             // x^5.25 will be handled like 100thRoot(x^525)
             int powerOfTen = GetFractionalPart(exponent).Length;
-            var a = exponent.Remove(exponent.IndexOf('.'), 1);
+            var a = exponent.Remove(index, 1);
             var exp = BigInteger.Parse(a);
-            return BigDecimal.Round(BigDecimal.NthRoot(BigDecimal.Pow(powBase, exp), (int)Math.Pow(10, powerOfTen), placesNumber), placesNumber).ToString();
+            var root = (int)Math.Pow(10, powerOfTen);
+            BigDecimal basa = BigDecimal.Pow(powBase, exp);
+            var nthroot = BigDecimal.NthRoot(basa, root, placesNumber);
+            return BigDecimal.Round(nthroot, placesNumber).ToString();
         }
         else
         {
@@ -588,44 +637,95 @@ internal partial class CalculatorPageViewModel
 
     private void HandleBrace(string input)
     {
-        throw new NotImplementedException();
+        if (input == "(") 
+        {
+            states.Push(new CalculatorInternalState
+            {
+                first = first,
+                firstOp = firstOp,
+                second = second,
+                secondOp = secondOp,
+                trailing = trailing,
+                constantNumberPressed = constantNumberPressed,
+                toDisplay = toDisplay,
+                state = state,
+            });
+            SetToBaseState(false);
+        }
+        else
+        {
+            if (states.Count == 0)
+                return;
+
+            var st = states.Pop();
+            if (st is null)
+                return;
+
+            var answer = EvaluateAnswer();
+
+            SetState(st);
+
+            switch (state)
+            {
+                case CalculatorState.INITIAL:
+                    first = answer;
+                    break;
+                case CalculatorState.TRANSITION_FROM_INITIAL:
+                    first = answer;
+                    break;
+                case CalculatorState.TRANSITION:
+                    second = answer;
+                    break;
+                case CalculatorState.TRANSITION_FROM_TRANSITION:
+                    second = answer;
+                    break;
+                case CalculatorState.TRAILING:
+                    trailing = answer;
+                    break;
+                case CalculatorState.TRANSITION_FROM_TRAILING:
+                    trailing = answer;
+                    break;
+                case CalculatorState.EQUAL:
+                    first = answer;
+                    break;
+                case CalculatorState.ERROR:
+                    break;
+                default:
+                    throw new Exception("Invalid state! BAD.");
+            }
+        }
     }
 
-    enum BinaryOperations
+    private void SetState(CalculatorInternalState st)
     {
-        Plus,
-        Minus,
-        Mult,
-        Div,
-        YsPower,
-        NthRoot
+        first = st.first; 
+        second = st.second;
+        firstOp = st.firstOp;
+        secondOp = st.secondOp;
+        trailing = st.trailing;
+        constantNumberPressed = st.constantNumberPressed;
+        toDisplay = st.toDisplay;
+        state = st.state;
     }
 
-    enum UnaryOperations
+
+    private string EvaluateAnswer()
     {
-        Sign,
-        Percent,
-        Comma,
-        TenPower,
-        Cube,
-        Square,
-        Invert, // 1/x
-        SquareRoot,
-        CubeRoot,
-        NaturalLogarithm,
-        DecimalLogarithm,
-        //Factorial,
-        Sin,
-        Cos,
-        Tan,
-        EulersNumber,
-        Sinh,
-        Cosh,
-        Tanh,
-        Pi,
-        Rand
+        var resultFOp1S = GetOperationResult(first, firstOp, second);
+        var resultSOp2T = GetOperationResult(second, secondOp, trailing);
+        var resultFOp1SOp2T = GetOperationResult(first, firstOp, resultSOp2T);
+        switch (state)
+        {
+            case CalculatorState.TRAILING:
+                return resultFOp1SOp2T;
+            case CalculatorState.TRANSITION_FROM_TRAILING:
+                return resultFOp1SOp2T;
+            case CalculatorState.ERROR:
+                throw new Exception("Invalid state");
+            default:
+                return resultFOp1S;
+        }
     }
-
 
     private readonly Dictionary<string, BinaryOperations> binaryOperators = new Dictionary<string, BinaryOperations> 
     {
@@ -661,25 +761,58 @@ internal partial class CalculatorPageViewModel
         { "π", UnaryOperations.Pi },
         { "rand", UnaryOperations.Rand }
     };
+}
 
+enum CalculatorState
+{
+    INITIAL,
+    TRANSITION_FROM_INITIAL,
+    TRANSITION,
+    TRANSITION_FROM_TRANSITION,
+    TRAILING,
+    TRANSITION_FROM_TRAILING,
+    EQUAL,
+    ERROR
+}
 
-    enum CalculatorState 
-    {
-        INITIAL,
-        TRANSITION_FROM_INITIAL,
-        TRANSITION,
-        TRANSITION_FROM_TRANSITION,
-        TRAILING,
-        TRANSITION_FROM_TRAILING,
-        EQUAL,
-        ERROR
-    }
+enum ToDisplay
+{
+    FIRST,
+    SECOND,
+    TRAILING
+}
 
-    enum ToDisplay
-    {
-        FIRST,
-        SECOND,
-        TRAILING
-    }
+enum BinaryOperations
+{
+    Plus,
+    Minus,
+    Mult,
+    Div,
+    YsPower,
+    NthRoot
+}
 
+enum UnaryOperations
+{
+    Sign,
+    Percent,
+    Comma,
+    TenPower,
+    Cube,
+    Square,
+    Invert, // 1/x
+    SquareRoot,
+    CubeRoot,
+    NaturalLogarithm,
+    DecimalLogarithm,
+    //Factorial,
+    Sin,
+    Cos,
+    Tan,
+    EulersNumber,
+    Sinh,
+    Cosh,
+    Tanh,
+    Pi,
+    Rand
 }
