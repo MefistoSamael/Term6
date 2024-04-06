@@ -12,7 +12,7 @@
     <OutputPath>.</OutputPath>
     <Name>Labs</Name>
     <RootNamespace>Lab1</RootNamespace>
-    <InterpreterId>MSBuild|env1|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -27,6 +27,7 @@
     <Compile Include="Lab1.py" />
     <Compile Include="Lab2.py" />
     <Compile Include="Lab3.py" />
+    <Compile Include="Lab4.py" />
     <Compile Include="main.py" />
   </ItemGroup>
   <ItemGroup>
