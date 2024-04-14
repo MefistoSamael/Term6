@@ -40,14 +40,17 @@
                 VerticalTextAlignment="Center"
                 Style="{StaticResource EqualsLabelStyle}"
                 Margin="16,0"/>
-            <Label
-                Text="{Binding Display, Mode=OneWay}"
-                VerticalOptions="Center"
-                VerticalTextAlignment="Center"
-                HorizontalOptions="End"
-                Grid.Column="1"
-                Style="{StaticResource ResultLabelStyle}"
-                Margin="16,0"/>
+
+            <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
+                <Label
+            Text="{Binding Display, Mode=OneWay}"
+            VerticalOptions="Center"
+            VerticalTextAlignment="Center"
+            HorizontalOptions="StartAndExpand"
+            LineBreakMode="WordWrap"
+            Style="{StaticResource ResultLabelStyle}"
+            Margin="16,0"/>
+            </ScrollView>
 
         </Grid>
 

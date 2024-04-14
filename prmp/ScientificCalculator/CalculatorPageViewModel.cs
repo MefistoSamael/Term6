@@ -53,6 +53,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
     public CalculatorPageViewModel()
     {
+        //calculator = new MockCalculator();
         calculator = new JavaMathCalculator();
         Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         Display = first;
@@ -238,26 +239,27 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
     private async Task HandleEqual(string input)
     {
-        var resultFOp1S = await GetOperationResult(first, firstOp, second); // 1 + 2
-        var resultSOp2T = await GetOperationResult(second, secondOp, trailing); // 2 * 3
-        var resultFOp1SOp2T = await GetOperationResult(first, firstOp, resultSOp2T); // 1 + 2 * 3
-
         switch (state)
         {
             case CalculatorState.TRAILING:
-                first = resultFOp1SOp2T;
+                var sOp2t = await GetOperationResult(second, secondOp, trailing); // 2 * 3
+                var fOp1SOp2t = await GetOperationResult(first, firstOp, sOp2t); // 1 + 2 * 3
+                first = fOp1SOp2t;
                 firstOp = secondOp;
                 second = trailing;
                 break;
             case CalculatorState.TRANSITION_FROM_TRAILING:
-                first = resultFOp1SOp2T;
+                var sOp2T = await GetOperationResult(second, secondOp, trailing); // 2 * 3
+                var fOp1SOp2T = await GetOperationResult(first, firstOp, sOp2T); // 1 + 2 * 3
+                first = fOp1SOp2T;
                 firstOp = secondOp;
                 second = trailing;
                 break;
             case CalculatorState.ERROR:
                 return;
             default:
-                first = resultFOp1S;
+                var fOp1S = await GetOperationResult(first, firstOp, second); // 1 + 2
+                first = fOp1S;
                 break;
         }
         toDisplay = ToDisplay.FIRST;

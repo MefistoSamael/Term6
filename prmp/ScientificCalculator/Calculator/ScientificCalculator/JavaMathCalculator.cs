@@ -5,14 +5,15 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
 {
     public class JavaMathCalculator : ICalculator
     {
+        BigInteger ComparePower = new BigInteger("99999");
         private readonly Random random = new Random();
         int SCALE = 45;
 
         RoundOptions ROUNDING_MODE = Java.Math.RoundOptions.Down;
-        public  JavaMathCalculator() { }
-        
-        
-        public JavaMathCalculator(int scale) 
+        public JavaMathCalculator() { }
+
+
+        public JavaMathCalculator(int scale)
         {
             SCALE = scale;
         }
@@ -28,28 +29,42 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
             var ft = new BigDecimal(first);
             var sd = new BigDecimal(second);
 
-            return await Task.Run( () =>  ft.Subtract(sd)!.ToEngineeringString()!);
+            return await Task.Run(() => ft.Subtract(sd)!.ToEngineeringString()!);
         }
         public async Task<string> Mult(string first, string second)
         {
             var ft = new BigDecimal(first);
             var sd = new BigDecimal(second);
 
-            return await Task.Run( () =>  ft.Multiply(sd)!.ToEngineeringString()!);
+            return await Task.Run(() => ft.Multiply(sd)!.ToEngineeringString()!);
         }
         public async Task<string> Div(string first, string second)
         {
             var ft = new BigDecimal(first);
             var sd = new BigDecimal(second);
 
-            return await Task.Run( () =>  ft.Divide(sd)!.ToEngineeringString()!);
+            return await Task.Run(() => ft.Divide(sd)!.ToEngineeringString()!);
         }
         public async Task<string> YsPower(string first, string second)
         {
             var ft = new BigDecimal(first);
-            var sd = int.Parse(second);
+            var sec = new BigInteger(second);
+            BigDecimal ans = new BigDecimal(1);
 
-            return await Task.Run( () =>  ft.Pow(sd)!.ToEngineeringString()!);
+            while (sec.CompareTo(ComparePower) >= 0)
+            {
+                ans = await Task.Run( () => ans.Multiply(ft.Pow(ComparePower.IntValue())));
+                //ans = ans.Multiply(ft.Pow(ComparePower.IntValue()));
+                sec = sec.Subtract(ComparePower);
+            }
+
+            if (sec.CompareTo(ComparePower) < 0 && sec.CompareTo(BigInteger.Zero) > 0)
+            {
+                //ans = await Task.Run(() => ans.Multiply(ft.Pow(sec.IntValueExact())));
+                ans = ans.Multiply(ft.Pow(sec.IntValueExact()));
+            }
+
+            return ans.ToEngineeringString();
         }
         public async Task<string> NthRoot(string first, string second)
         {
@@ -89,10 +104,10 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
                 return first.Remove(0, 1);
         }
         public async Task<string> Percent(string first)
-        { 
+        {
             var a = new BigDecimal(first);
 
-            return await Task.Run( () =>  a.Divide(new BigDecimal(100))!.ToEngineeringString()!);
+            return await Task.Run(() => a.Divide(new BigDecimal(100))!.ToEngineeringString()!);
         }
         public string Comma(string first)
         {
@@ -106,29 +121,29 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
         }
         public async Task<string> TenPower(string first)
         {
-            return await Task.Run( () =>  new BigDecimal(10).Pow(int.Parse(first))!.ToEngineeringString()!);
+            return await Task.Run(() => new BigDecimal(10).Pow(int.Parse(first))!.ToEngineeringString()!);
         }
         public async Task<string> Cube(string first)
         {
-            return await Task.Run( () =>  new BigDecimal(first).Pow(3)!.ToEngineeringString()!);
+            return await Task.Run(() => new BigDecimal(first).Pow(3)!.ToEngineeringString()!);
         }
         public async Task<string> Square(string first)
         {
-            return await Task.Run( () =>  new BigDecimal(first).Pow(2)!.ToEngineeringString()!);
+            return await Task.Run(() => new BigDecimal(first).Pow(2)!.ToEngineeringString()!);
         }
-        public async Task<string> Invert(string first) 
+        public async Task<string> Invert(string first)
         {
-            return await Task.Run( () =>  new BigDecimal(1).Divide(new BigDecimal(first)).ToEngineeringString());
+            return await Task.Run(() => new BigDecimal(1).Divide(new BigDecimal(first)).ToEngineeringString());
         }
-        public async Task<string> SquareRoot(string first) 
+        public async Task<string> SquareRoot(string first)
         {
-            return await Task.Run( () =>  new BigDecimal(first).Sqrt(new MathContext(SCALE)).ToEngineeringString()!);
+            return await Task.Run(() => new BigDecimal(first).Sqrt(new MathContext(SCALE)).ToEngineeringString()!);
         }
-        public async Task<string> CubeRoot(string first) 
+        public async Task<string> CubeRoot(string first)
         {
             return await NthRoot(first, "3");
         }
-        public async Task<string> NaturalLogarithm(string first) 
+        public async Task<string> NaturalLogarithm(string first)
         {
             int scale = SCALE;
             var x = new BigDecimal(first);
@@ -143,7 +158,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
 
             if (magnitude < 3)
             {
-                return await Task.Run( () =>  lnNewton(x, scale)!.ToEngineeringString());
+                return await Task.Run(() => lnNewton(x, scale)!.ToEngineeringString());
             }
 
             // Compute magnitude*ln(x^(1/magnitude)).
@@ -156,7 +171,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
                 BigDecimal lnRoot = await Task.Run(() => lnNewton(root, scale));
 
                 // magnitude*ln(x^(1/magnitude))
-                return await Task.Run( () =>  BigDecimal.ValueOf(magnitude).Multiply(lnRoot)
+                return await Task.Run(() => BigDecimal.ValueOf(magnitude).Multiply(lnRoot)
                             .SetScale(scale, BigDecimal.RoundHalfEven).ToEngineeringString());
             }
         }
@@ -245,7 +260,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
             return x;
         }
 
-        private  BigDecimal IntPower(BigDecimal x, long exponent, int scale)
+        private BigDecimal IntPower(BigDecimal x, long exponent, int scale)
         {
             // If the exponent is negative, compute 1/(x^-exponent).
             if (exponent < 0)
@@ -329,7 +344,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
                             .SetScale(scale, BigDecimal.RoundHalfEven);
         }
 
-        private  BigDecimal expTaylor(BigDecimal x, int scale)
+        private BigDecimal expTaylor(BigDecimal x, int scale)
         {
             BigDecimal factorial = BigDecimal.ValueOf(1);
             BigDecimal xPower = x;
@@ -363,7 +378,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
             return sum;
         }
 
-        public async Task<string> DecimalLogarithm(string first) 
+        public async Task<string> DecimalLogarithm(string first)
         {
             var b = new BigDecimal(first);
             int NUM_OF_DIGITS = SCALE + 2;
@@ -382,11 +397,11 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
             }
             else if (b.CompareTo(BigDecimal.One) == 0)
             {
-                return await Task.Run( () =>  BigDecimal.Zero.ToEngineeringString());
+                return await Task.Run(() => BigDecimal.Zero.ToEngineeringString());
             }
             else if (b.CompareTo(BigDecimal.One) < 0)
             {
-                return await Task.Run( () =>  Sign(DecimalLogarithm((BigDecimal.One).Divide(b, mc).ToEngineeringString()).Result));
+                return await Task.Run(() => Sign(DecimalLogarithm((BigDecimal.One).Divide(b, mc).ToEngineeringString()).Result));
             }
 
             StringBuilder sb = new StringBuilder();
@@ -400,7 +415,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
             int n = 0;
             while (n < NUM_OF_DIGITS)
             {
-                await Task.Run( () => b = (b.MovePointLeft(leftDigits - 1)).Pow(10, mc));
+                await Task.Run(() => b = (b.MovePointLeft(leftDigits - 1)).Pow(10, mc));
                 leftDigits = b.Precision() - b.Scale();
                 sb.Append(leftDigits - 1);
                 n++;
@@ -415,7 +430,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
                                     ans.Precision() - ans.Scale() + SCALE, RoundingMode.HalfEven));
             return ans.ToEngineeringString();
         }
-        public async Task<string> Sin(string first) 
+        public async Task<string> Sin(string first)
         {
             var x = new BigDecimal(first);
             BigDecimal lastVal = x.Add(BigDecimal.One);
@@ -450,12 +465,12 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
             }
             return currentValue.ToEngineeringString();
         }
-        public async Task<string> Cos(string first) 
+        public async Task<string> Cos(string first)
         {
             var x = new BigDecimal(first);
             BigDecimal currentValue = BigDecimal.One;
             BigDecimal lastVal = currentValue.Add(BigDecimal.One);
-            BigDecimal xSquared = await Task.Run( () => x.Multiply(x));
+            BigDecimal xSquared = await Task.Run(() => x.Multiply(x));
             BigDecimal numerator = BigDecimal.One;
             BigDecimal denominator = BigDecimal.One;
             int i = 0;
@@ -485,18 +500,18 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
 
             return currentValue.ToEngineeringString()!;
         }
-        public async Task<string> Tan(string first) 
+        public async Task<string> Tan(string first)
         {
             BigDecimal sin = new BigDecimal(await Sin(first));
             BigDecimal cos = new BigDecimal(await Cos(first));
 
-            return await Task.Run( () =>  sin.Divide(cos, SCALE, BigDecimal.RoundHalfUp)!.ToEngineeringString()!);
+            return await Task.Run(() => sin.Divide(cos, SCALE, BigDecimal.RoundHalfUp)!.ToEngineeringString()!);
         }
-        public string EulersNumber() 
+        public string EulersNumber()
         {
             return ExtendedNumerics.BigDecimal.E.ToString();
         }
-        public string Pi() 
+        public string Pi()
         {
             return ExtendedNumerics.BigDecimal.Pi.ToString();
         }
@@ -508,98 +523,3 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
     }
 }
 
-/*
-
-public async Task<string> Plus(string first, string second)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<string> Minus(string first, string second)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<string> Mult(string first, string second)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<string> Div(string first, string second)
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> YsPower(string first, string second)
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> NthRoot(string first, string second)
-        { 
-            throw new NotImplementedException();
-        }
-
-
-        public async Task<string> Sign(string first)
-        { 
-            throw new NotImplementedException(); 
-        }
-        public async Task<string> Percent(string first)
-        { 
-            throw new NotImplementedException(); 
-        }
-        public async Task<string> Comma(string first)
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> TenPower(string first)
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> Cube(string first)
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> Square(string first)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<string> Invert(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> SquareRoot(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> CubeRoot(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> NaturalLogarithm(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> DecimalLogarithm(string first) 
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<string> Sin(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> Cos(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> Tan(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> EulersNumber(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-        public async Task<string> Pi(string first) 
-        { 
-            throw new NotImplementedException();
-        }
-
- 
-*/
