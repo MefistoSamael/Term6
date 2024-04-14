@@ -5,16 +5,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.ApplicationServices;
-
+//data structures
 namespace Lab6
 {
     public partial class Form2 : Form
     {
+        private int Const2 = 2;
+
         private enum Roles
         {
             Admin,
+            Guest,
             User,
-            Guest
+            SuperUser,
+            Accounter
         }
 
         private class DefenseSystemSwitcher
@@ -25,13 +29,56 @@ namespace Lab6
             public bool Dos { get; set; }
         }
 
+        public class P1
+        {
+            static public int ch = 39;
+            public string Username { get; set; }
+            public int Role { get; set; }
+            public bool IsSignedIn { get; set; }
+        }
+
+        public class P2
+        {
+            public string Password { get; set; }
+
+            private int slotIndex = -1;
+            public int SlotIndex
+            {
+                get
+                {
+                    var cst = Eval(Const1, 4);
+                    var a = cst ^ 7;
+                    return slotIndex + ((a | Const1 / 6) & ~(a & Const1 / 7 + 1));
+                }
+                set
+                {
+                    slotIndex = value - Eval();
+                }
+            }
+
+            private int Const1 = 42;
+
+            private int Eval(int a = 3, int c = 4)
+            {
+                Random aa = new Random();
+
+                var b = (aa.Next(c) + a / 3 * 52) % 4;
+
+                int z = Convert.ToInt32((b + 42 * Math.Pow(10, b)) / Math.PI * (70 - (Const1 + 28)));
+
+                return (int)(P1.ch + z + 52);
+            }
+        }
+
         private class User
         {
-            public string Login { get; set; }
-            public string Password { get; set; }
-            public Roles Role { get; set; }
-            public bool IsSignedIn { get; set; }
-            public int SlotIndex { get; set; } = -1;
+            private P1 a = new();
+            private P2 b = new();
+            public string Login { get => a.Username; set => a.Username = value; }
+            public string Password { get => b.Password; set => b.Password = value; }
+            public int Role { get => a.Role; set => a.Role = value; }
+            public bool IsSignedIn { get => a.IsSignedIn; set => a.IsSignedIn = value; }
+            public int SlotIndex { get => b.SlotIndex; set => b.SlotIndex = value; }
 
             public User(string login, string password)
             {
@@ -63,11 +110,9 @@ namespace Lab6
             usersData.Add(new User("u", "1"));
             usersData.Add(new User("g", "1"));
 
-            // Assign roles
-            usersData[0].Role = Roles.Admin;
-            usersData[1].Role = Roles.User;
-            usersData[2].Role = Roles.Guest;
-            // Other users will default to Client as it's the last in the enum list
+            usersData[0].Role = 0;
+            usersData[1].Role = 1;
+            usersData[2].Role = 2;
         }
 
         private void AssignControlsToUsers()
@@ -102,9 +147,6 @@ namespace Lab6
                 Xss = AttackDefensesCheckedListBox.CheckedIndices.Contains(3)
             };
         }
-
-        // SignIn_Click, Se_C, SignOut_Click methods remain the same, with one change:
-        // Replace IsServerLagging with IsServerLagging
 
         private void SignIn_Click(object sender, EventArgs e)
         {
@@ -200,7 +242,7 @@ namespace Lab6
 
             // If Privilege Minimization defense is active and the user's role is Client,
             // they do not have sufficient privileges to proceed.
-            if (defense.PrivilegeMinimization && userByIndex.Role == Roles.Guest)
+            if (defense.PrivilegeMinimization && userByIndex.Role == 2)
             {
                 MessageBox.Show("Insufficient privileges!", "Access Error");
                 return;

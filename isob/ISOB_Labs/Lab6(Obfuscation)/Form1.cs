@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+// lexical
 namespace Lab6
 {
     public partial class Form1 : Form
