@@ -8,7 +8,7 @@ using Microsoft.VisualBasic.ApplicationServices;
 
 namespace Lab6
 {
-    public partial class Form1 : Form
+    public partial class Form3 : Form
     {
         private enum Roles
         {
@@ -49,7 +49,7 @@ namespace Lab6
 
         private int limit = 2;
 
-        public Form1()
+        public Form3()
         {
             InitializeComponent();
 
@@ -103,7 +103,7 @@ namespace Lab6
             };
         }
 
-        // SignIn_Click, Send_Click, SignOut_Click methods remain the same, with one change:
+        // SignIn_Click, Se_C, SignOut_Click methods remain the same, with one change:
         // Replace IsServerLagging with IsServerLagging
 
         private void SignIn_Click(object sender, EventArgs e)
@@ -167,7 +167,7 @@ namespace Lab6
             }
         }
 
-        private void Send_Click(object sender, EventArgs e)
+        private void Se_C(object sender, EventArgs e)
         {
             int index = GetIndex(sender as Button);
             string messageText = messageFields[index].Text;

@@ -73,7 +73,7 @@
             SignIn1.TabIndex = 2;
             SignIn1.Text = "Enter";
             SignIn1.UseVisualStyleBackColor = true;
-            SignIn1.Click += SignIn_Click;
+            SignIn1.Click += S_C;
             // 
             // Message1
             // 
@@ -120,7 +120,7 @@
             Send1.Text = "Send";
             Send1.UseVisualStyleBackColor = true;
             Send1.Visible = false;
-            Send1.Click += Send_Click;
+            Send1.Click += Se_C;
             // 
             // AttackDefensesCheckedListBox
             // 
@@ -142,7 +142,7 @@
             SignOut1.Text = "Exit";
             SignOut1.UseVisualStyleBackColor = true;
             SignOut1.Visible = false;
-            SignOut1.Click += SignOut_Click;
+            SignOut1.Click += SO_C;
             // 
             // SignOut2
             // 
@@ -154,7 +154,7 @@
             SignOut2.Text = "Exit";
             SignOut2.UseVisualStyleBackColor = true;
             SignOut2.Visible = false;
-            SignOut2.Click += SignOut_Click;
+            SignOut2.Click += SO_C;
             // 
             // Send2
             // 
@@ -166,7 +166,7 @@
             Send2.Text = "Send";
             Send2.UseVisualStyleBackColor = true;
             Send2.Visible = false;
-            Send2.Click += Send_Click;
+            Send2.Click += Se_C;
             // 
             // Message2
             // 
@@ -187,7 +187,7 @@
             SignOut3.Text = "Exit";
             SignOut3.UseVisualStyleBackColor = true;
             SignOut3.Visible = false;
-            SignOut3.Click += SignOut_Click;
+            SignOut3.Click += SO_C;
             // 
             // Send3
             // 
@@ -199,7 +199,7 @@
             Send3.Text = "Send";
             Send3.UseVisualStyleBackColor = true;
             Send3.Visible = false;
-            Send3.Click += Send_Click;
+            Send3.Click += Se_C;
             // 
             // Message3
             // 
@@ -220,7 +220,7 @@
             SignOut4.Text = "Exit";
             SignOut4.UseVisualStyleBackColor = true;
             SignOut4.Visible = false;
-            SignOut4.Click += SignOut_Click;
+            SignOut4.Click += SO_C;
             // 
             // Send4
             // 
@@ -232,7 +232,7 @@
             Send4.Text = "Send";
             Send4.UseVisualStyleBackColor = true;
             Send4.Visible = false;
-            Send4.Click += Send_Click;
+            Send4.Click += Se_C;
             // 
             // Message4
             // 

@@ -1,6 +1,6 @@
 ﻿namespace Lab6
 {
-    partial class Form1
+    partial class Form12
     {
         /// <summary>
         ///  Required designer variable.
@@ -21,10 +21,10 @@
         }
 
 
-        private List<TextBox> messageFields = new();
-        private List<Button> signOutButtons = new();
-        private List<Button> sendButtons = new();
-        private List<Label> usernameLabels = new();
+        private List<TextBox> T0LTxj6iD3xZYdp = new();
+        private List<Button> nczVDbRrWgfleAp = new();
+        private List<Button> Cz1vwhEqHIgGg7K = new();
+        private List<Label> xvcX7GqZw3PQirO = new();
 
 
 
@@ -120,7 +120,7 @@
             Send1.Text = "Send";
             Send1.UseVisualStyleBackColor = true;
             Send1.Visible = false;
-            Send1.Click += Send_Click;
+            Send1.Click += Se_C;
             // 
             // AttackDefensesCheckedListBox
             // 
@@ -166,7 +166,7 @@
             Send2.Text = "Send";
             Send2.UseVisualStyleBackColor = true;
             Send2.Visible = false;
-            Send2.Click += Send_Click;
+            Send2.Click += Se_C;
             // 
             // Message2
             // 
@@ -199,7 +199,7 @@
             Send3.Text = "Send";
             Send3.UseVisualStyleBackColor = true;
             Send3.Visible = false;
-            Send3.Click += Send_Click;
+            Send3.Click += Se_C;
             // 
             // Message3
             // 
@@ -232,7 +232,7 @@
             Send4.Text = "Send";
             Send4.UseVisualStyleBackColor = true;
             Send4.Visible = false;
-            Send4.Click += Send_Click;
+            Send4.Click += Se_C;
             // 
             // Message4
             // 

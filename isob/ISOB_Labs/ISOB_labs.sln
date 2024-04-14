@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lab1(Caesar)", "Lab1(Caesar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lab2(Kerberos)", "Lab2(Kerberos)\Lab2(Kerberos).csproj", "{319127A4-4477-4469-B224-D2D75449846E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lab6(Obfuscation)", "Lab6(Obfuscation)\Lab6(Obfuscation).csproj", "{043D1584-0065-4A59-82BB-909AC62B097D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{319127A4-4477-4469-B224-D2D75449846E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{319127A4-4477-4469-B224-D2D75449846E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{319127A4-4477-4469-B224-D2D75449846E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{043D1584-0065-4A59-82BB-909AC62B097D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{043D1584-0065-4A59-82BB-909AC62B097D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{043D1584-0065-4A59-82BB-909AC62B097D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{043D1584-0065-4A59-82BB-909AC62B097D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
