@@ -31,16 +31,16 @@ internal partial class CalculatorPageViewModel : ObservableObject
     string first = "0";
     string second = "0";
     string trailing = "0";
-    
+
     BinaryOperations firstOp = BinaryOperations.Plus;
     BinaryOperations secondOp = BinaryOperations.Plus;
 
     [ObservableProperty]
     string display;
     ToDisplay toDisplay = ToDisplay.FIRST;
-    
+
     CalculatorState state = CalculatorState.INITIAL;
-    
+
     bool constantNumberPressed = false;
 
     const int placesNumber = 45;
@@ -83,7 +83,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
         if (input == "cos")
         {
             var decimalOperand = GetBigDecimal(first);
-            
+
             var result = await Task.Run(() => BigDecimal.Round(BigDecimal.Cos(decimalOperand, placesNumber), placesNumber).ToString());
             first = result;
             DisplayNumber();
@@ -95,13 +95,17 @@ internal partial class CalculatorPageViewModel : ObservableObject
         else if (isEqual(input))
             try
             {
-                HandleEqual(input);
+                await HandleEqual(input);
             }
             catch (InvalidDataException)
             {
                 SetToErrorState();
             }
             catch (DivideByZeroException)
+            {
+                SetToErrorState();
+            }
+            catch (OverflowException)
             {
                 SetToErrorState();
             }
@@ -120,6 +124,10 @@ internal partial class CalculatorPageViewModel : ObservableObject
             {
                 SetToErrorState();
             }
+            catch (OverflowException)
+            {
+                SetToErrorState();
+            }
         else if (isUnaryOperation(input))
             try
             {
@@ -133,8 +141,12 @@ internal partial class CalculatorPageViewModel : ObservableObject
             {
                 SetToErrorState();
             }
+            catch (OverflowException)
+            {
+                SetToErrorState();
+            }
         else if (isBrace(input) && state != CalculatorState.ERROR)
-            HandleBrace(input);
+            await HandleBrace(input);
         else if (constantNumberPressed)
         { }
         else
@@ -224,11 +236,12 @@ internal partial class CalculatorPageViewModel : ObservableObject
         return input == "=";
     }
 
-    private void HandleEqual(string input)
+    private async Task HandleEqual(string input)
     {
-        var resultFOp1S = GetOperationResult(first, firstOp, second); // 1 + 2
-        var resultSOp2T = GetOperationResult(second, secondOp, trailing); // 2 * 3
-        var resultFOp1SOp2T = GetOperationResult(first, firstOp, resultSOp2T); // 1 + 2 * 3
+        var resultFOp1S = await GetOperationResult(first, firstOp, second); // 1 + 2
+        var resultSOp2T = await GetOperationResult(second, secondOp, trailing); // 2 * 3
+        var resultFOp1SOp2T = await GetOperationResult(first, firstOp, resultSOp2T); // 1 + 2 * 3
+
         switch (state)
         {
             case CalculatorState.TRAILING:
@@ -532,7 +545,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
             case UnaryOperations.TenPower:
                 return await calculator.TenPower(operand);
-                
+
             case UnaryOperations.Cube:
                 return await calculator.Cube(operand);
 
@@ -541,7 +554,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
             case UnaryOperations.Invert:
                 return await calculator.Invert(operand);
-                
+
             case UnaryOperations.SquareRoot:
                 return await calculator.SquareRoot(operand);
 
@@ -569,24 +582,24 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
             case UnaryOperations.EulersNumber:
                 constantNumberPressed = true;
-                return await calculator.EulersNumber();
+                return calculator.EulersNumber();
 
-            case UnaryOperations.Sinh:
-                return BigDecimal.Round(BigDecimal.Sinh(decimalOperand), placesNumber).ToString();
-                
-            case UnaryOperations.Cosh:
-                return BigDecimal.Round(BigDecimal.Cosh(decimalOperand), placesNumber).ToString();
-                
-            case UnaryOperations.Tanh:
-                return BigDecimal.Round(BigDecimal.Tanh(decimalOperand), placesNumber).ToString();
-                
+            //case UnaryOperations.Sinh:
+            //    return BigDecimal.Round(BigDecimal.Sinh(decimalOperand), placesNumber).ToString();
+
+            //case UnaryOperations.Cosh:
+            //    return BigDecimal.Round(BigDecimal.Cosh(decimalOperand), placesNumber).ToString();
+
+            //case UnaryOperations.Tanh:
+            //    return BigDecimal.Round(BigDecimal.Tanh(decimalOperand), placesNumber).ToString();
+
             case UnaryOperations.Pi:
                 constantNumberPressed = true;
-                return BigDecimal.GetPiDigits(placesNumber).ToString();
-                
+                return calculator.Pi();
+
             case UnaryOperations.Rand:
                 constantNumberPressed = true;
-                return rnd.Next().ToString();
+                return calculator.Rand();
 
 
             default:
@@ -611,7 +624,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
             return BigDecimal.Round(BigDecimal.NthRoot(decimalOperand, root, placesNumber), placesNumber).ToString();
         }
-        
+
     }
 
     private string GetFractionalPart(string number)
@@ -643,9 +656,9 @@ internal partial class CalculatorPageViewModel : ObservableObject
         return input == "(" || input == ")";
     }
 
-    private void HandleBrace(string input)
+    private async Task HandleBrace(string input)
     {
-        if (input == "(") 
+        if (input == "(")
         {
             states.Push(new CalculatorInternalState
             {
@@ -669,7 +682,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
             if (st is null)
                 return;
 
-            var answer = EvaluateAnswer();
+            var answer = await EvaluateAnswer();
 
             SetState(st);
 
@@ -706,7 +719,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
     private void SetState(CalculatorInternalState st)
     {
-        first = st.first; 
+        first = st.first;
         second = st.second;
         firstOp = st.firstOp;
         secondOp = st.secondOp;
@@ -717,11 +730,11 @@ internal partial class CalculatorPageViewModel : ObservableObject
     }
 
 
-    private string EvaluateAnswer()
+    private async Task<string> EvaluateAnswer()
     {
-        var resultFOp1S = GetOperationResult(first, firstOp, second);
-        var resultSOp2T = GetOperationResult(second, secondOp, trailing);
-        var resultFOp1SOp2T = GetOperationResult(first, firstOp, resultSOp2T);
+        var resultFOp1S = await GetOperationResult(first, firstOp, second);
+        var resultSOp2T = await GetOperationResult(second, secondOp, trailing);
+        var resultFOp1SOp2T = await GetOperationResult(first, firstOp, resultSOp2T);
         switch (state)
         {
             case CalculatorState.TRAILING:
@@ -735,7 +748,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
         }
     }
 
-    private readonly Dictionary<string, BinaryOperations> binaryOperators = new Dictionary<string, BinaryOperations> 
+    private readonly Dictionary<string, BinaryOperations> binaryOperators = new Dictionary<string, BinaryOperations>
     {
         { "+", BinaryOperations.Plus },
         { "-", BinaryOperations.Minus },

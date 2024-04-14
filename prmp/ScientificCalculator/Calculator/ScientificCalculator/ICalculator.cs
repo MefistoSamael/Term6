@@ -32,5 +32,6 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
         Task<string> Tan(string first);
         string EulersNumber();
         string Pi();
+        string Rand();
     }
 }

@@ -1,13 +1,11 @@
-﻿using Android.Icu.Number;
-using Android.OS;
-using Java.Lang;
+﻿using Java.Lang;
 using Java.Math;
-using System.Linq;
 
 namespace ScientificCalculator.Calculator.ScientificCalculator
 {
     public class JavaMathCalculator : ICalculator
     {
+        private readonly Random random = new Random();
         int SCALE = 45;
 
         RoundOptions ROUNDING_MODE = Java.Math.RoundOptions.Down;
@@ -501,6 +499,11 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
         public string Pi() 
         {
             return ExtendedNumerics.BigDecimal.Pi.ToString();
+        }
+
+        public string Rand()
+        {
+            return random.Next().ToString();
         }
     }
 }

@@ -27,6 +27,7 @@
             Grid.ColumnSpan="5"/>
 
         <!-- Answer Row -->
+
         <Grid            
             ColumnDefinitions="Auto,*"
             Grid.Row="1"
@@ -39,7 +40,6 @@
                 VerticalTextAlignment="Center"
                 Style="{StaticResource EqualsLabelStyle}"
                 Margin="16,0"/>
-
             <Label
                 Text="{Binding Display, Mode=OneWay}"
                 VerticalOptions="Center"
@@ -50,6 +50,7 @@
                 Margin="16,0"/>
 
         </Grid>
+
 
         <!-- Scientific Operators -->
 
