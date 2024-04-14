@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.ApplicationServices;
 using System.Security.Permissions;
-
+// data structures + lexical
 namespace Lab6
 {
     public partial class Form12 : Form
@@ -44,28 +44,15 @@ namespace Lab6
             {
                 get
                 {
-                    var cst = DFq435hk54jFHDlk235(Ff7Fflkjha3kajsdf8, 4);
-                    var a = cst ^ 7;
-                    return sdsGDfg5gjhJH + ((a | Ff7Fflkjha3kajsdf8 / 6) & ~(a & Ff7Fflkjha3kajsdf8 / 7 + 1));
+                    return sdsGDfg5gjhJH;
                 }
                 set
                 {
-                    sdsGDfg5gjhJH = value - DFq435hk54jFHDlk235();
+                    sdsGDfg5gjhJH = value;
                 }
             }
 
             private int Ff7Fflkjha3kajsdf8 = 42;
-
-            private int DFq435hk54jFHDlk235(int a = 3, int c = 4)
-            {
-                Random aa = new Random();
-
-                var b = (aa.Next(c) + a / 3 * 52) % 4;
-
-                int z = Convert.ToInt32((b + 42 * Math.Pow(10, b)) / Math.PI * (70 - (Ff7Fflkjha3kajsdf8 + 28)));
-
-                return (int)(An1.bpiMKevlsdfzb + z + 52);
-            }
         }
 
 
@@ -135,24 +122,14 @@ namespace Lab6
 
             InitializeComponent();
 
-            zWUtEktC4i.Add(new n9zyErY2wh("a", "1"));
+            
             mGCWpEDIrH();
-            zWUtEktC4i[0].fdMgppHkvd = -5463456;
-            zWUtEktC4i[1].fdMgppHkvd = 223423;
-            zWUtEktC4i[2].fdMgppHkvd = 654;
             gjTp2Opiko();
-            FGetsdfrt();
-        }
-
-        private void FGetsdfrt()
-        {
-            zWUtEktC4i[0].fdMgppHkvd = 0;
-            zWUtEktC4i[1].fdMgppHkvd = 1;
-            zWUtEktC4i[2].fdMgppHkvd = 2;
         }
 
         private void mGCWpEDIrH()
-        {   
+        {
+            zWUtEktC4i.Add(new n9zyErY2wh("a", "1"));
             zWUtEktC4i.Add(new n9zyErY2wh("u", "1"));
             zWUtEktC4i.Add(new n9zyErY2wh("g", "1"));
         }
@@ -166,15 +143,9 @@ namespace Lab6
                 Cz1vwhEqHIgGg7K.Add(this.Controls[$"Send{i}"] as Button);
                 xvcX7GqZw3PQirO.Add(this.Controls[$"Username{i}"] as Label);
             }
-            KSHDFKJSGFKGE();
-            zWUtEktC4i[1].fdMgppHkvd = 1256765432;
-            zWUtEktC4i[2].fdMgppHkvd = 2394875;
-        }
-
-        private void KSHDFKJSGFKGE()
-        {
-            Console.WriteLine("Waiting for initialization");
-
+            zWUtEktC4i[0].fdMgppHkvd = 0;
+            zWUtEktC4i[1].fdMgppHkvd = 1;
+            zWUtEktC4i[2].fdMgppHkvd = 2;
         }
 
         private int dSmessageFieldsYSr0O5(Control DHUuUbtjl0) => int.Parse(DHUuUbtjl0.Name.Last().ToString()) - 1;
@@ -185,14 +156,8 @@ namespace Lab6
             return int.Parse(T0LTxj6iD3xZYdp.Where(m => m.Visible == false).First().Name.Last().ToString()) - 1;
         }
 
-        private bool ARTfsd(bool a)
-        {
-            if (a)
-                return zWUtEktC4i.Count(NyQMi9BgKx => NyQMi9BgKx.GzZaKKFzHq) >= POxGI0R4gJ;
-            else
-                return zWUtEktC4i.Count(bZODsuVPJ2 => bZODsuVPJ2.GzZaKKFzHq) == POxGI0R4gJ - 1;
-
-        }
+        private bool Hdsf2asd() => zWUtEktC4i.Count(NyQMi9BgKx => NyQMi9BgKx.GzZaKKFzHq) >= POxGI0R4gJ;
+        private bool Hdsf3Asd() => zWUtEktC4i.Count(bZODsuVPJ2 => bZODsuVPJ2.GzZaKKFzHq) == POxGI0R4gJ - 1;
 
         private y9R1JO2oIx orFfdajuQb()
         {
@@ -201,6 +166,7 @@ namespace Lab6
                 bpiMKevlZb = AttackDefensesCheckedListBox.CheckedIndices.Contains(0),
                 bpiMKevlzb = AttackDefensesCheckedListBox.CheckedIndices.Contains(1),
                 bpliMKevlzb = AttackDefensesCheckedListBox.CheckedIndices.Contains(2),
+                bpiMKevlz8 = AttackDefensesCheckedListBox.CheckedIndices.Contains(3)
             };
         }
 
@@ -210,30 +176,20 @@ namespace Lab6
             string NyQMi9Bgkx = Login1.Text;
             string NyQMi9BgKix = Password1.Text;
             n9zyErY2wh NyQML9BgKx = zWUtEktC4i.Find(user => user.NJwgJuvx1Z == NyQMi9Bgkx);
-            y9R1JO2oIx NyQMi98gKx = new y9R1JO2oIx
-            {
-                bpiMKevlZb = AttackDefensesCheckedListBox.CheckedIndices.Contains(0),
-                bpiMKevlzb = AttackDefensesCheckedListBox.CheckedIndices.Contains(1),
-                bpliMKevlzb = AttackDefensesCheckedListBox.CheckedIndices.Contains(2),
-                bpiMKevlz8 = AttackDefensesCheckedListBox.CheckedIndices.Contains(3)
-            };
+            y9R1JO2oIx NyQMi98gKx = orFfdajuQb();
 
 
             if (NyQMi9BgIx < 0 || NyQMi9BgIx >= zWUtEktC4i.Count)
             {
                 return;
-
-                int veryIp = 346;
-                veryIp += 132456765;
-                throw new Exception("sadljksjfgsljkdfhglsjkdghlskdghsdfl;ghskjdg");
             }
 
-            if (ARTfsd(false) && !NyQMi98gKx.bpliMKevlzb)
+            if (Hdsf3Asd() && !NyQMi98gKx.bpliMKevlzb)
             {
                 MessageBox.Show("ALARM!!!!! The server load is high. Next connection will shut down the server");
             }
 
-            if (ARTfsd(true))
+            if (Hdsf2asd())
             {
                 if (NyQMi98gKx.bpliMKevlzb)
                 {
@@ -256,6 +212,7 @@ namespace Lab6
                 MessageBox.Show($"User {NyQMi9Bgkx} already authorized in {NyQML9BgKx.l0U5EAa3NZ + 1} slot", "Authorization error");
                 return;
             }
+
             if (NyQML9BgKx != null && NyQML9BgKx.MZHOzndTyj == NyQMi9BgKix)
             {
                 NyQML9BgKx.GzZaKKFzHq = true;
@@ -275,13 +232,7 @@ namespace Lab6
             string v4msSuNua1 = T0LTxj6iD3xZYdp[V4mcSuNua1].Text;
             string v4mcSnNua1;
             var v4mcSuNna1 = zWUtEktC4i.Find(user => user.l0U5EAa3NZ == V4mcSuNua1);
-            y9R1JO2oIx v4mcSuUna1 = new y9R1JO2oIx
-            {
-                bpiMKevlZb = AttackDefensesCheckedListBox.CheckedIndices.Contains(0),
-                bpiMKevlzb = AttackDefensesCheckedListBox.CheckedIndices.Contains(1),
-                bpliMKevlzb = AttackDefensesCheckedListBox.CheckedIndices.Contains(2),
-                bpiMKevlz8 = AttackDefensesCheckedListBox.CheckedIndices.Contains(3)
-            };
+            y9R1JO2oIx v4mcSuUna1 = orFfdajuQb();
 
             if (0 > V4mcSuNua1 || V4mcSuNua1 >= zWUtEktC4i.Count)
             {

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.ApplicationServices;
+using Microsoft.VisualBasic;
+//flow control
 
 namespace Lab6
 {
@@ -24,7 +26,7 @@ namespace Lab6
             public bool Xss { get; set; }
             public bool Dos { get; set; }
         }
-
+        double ch;
         private class User
         {
             public string Login { get; set; }
@@ -53,21 +55,26 @@ namespace Lab6
         {
             InitializeComponent();
 
+            usersData.Add(new User("a", "1"));
             InitializeUsersData();
+            usersData[0].Role = 0;
+            usersData[1].Role = Roles.Guest;
+            usersData[2].Role = Roles.Admin;
             AssignControlsToUsers();
+            Users();
         }
 
         private void InitializeUsersData()
         {
-            usersData.Add(new User("a", "1"));
             usersData.Add(new User("u", "1"));
-            usersData.Add(new User("g", "1"));
+            usersData.Add(new User("g", "1")); 
+        }
 
-            // Assign roles
+        private void Users()
+        {
             usersData[0].Role = Roles.Admin;
             usersData[1].Role = Roles.User;
             usersData[2].Role = Roles.Guest;
-            // Other users will default to Client as it's the last in the enum list
         }
 
         private void AssignControlsToUsers()
@@ -79,18 +86,37 @@ namespace Lab6
                 sendButtons.Add(this.Controls[$"Send{i}"] as Button);
                 usernameLabels.Add(this.Controls[$"Username{i}"] as Label);
             }
+            usersData[1].Role = Roles.Admin;
+            Evals();
+            usersData[0].Role = Roles.User;
+        }
+
+        private void Evals()
+        {
+            Console.WriteLine("Waiting for evaluations");
+            double a = 0;
+            for (int i = 1000; i <= 10000; i++)
+            {
+                a = Math.Sin(i);
+            }
+            ch = a;
         }
 
         private int GetIndex(Control sender) => int.Parse(sender.Name.Last().ToString()) - 1;
 
         private int GetLogInIndex()
         {
+            GetDefenseSystemSwitcher();
             return int.Parse(messageFields.Where(m => m.Visible == false).First().Name.Last().ToString()) - 1;
         }
 
-
-        private bool IsServerLagging() => usersData.Count(user => user.IsSignedIn) >= limit;
-        private bool IsServerAlmostLagging() => usersData.Count(user => user.IsSignedIn) == limit - 1;
+        private bool Lags(bool a)
+        {
+            if (a)
+                return usersData.Count(user => user.IsSignedIn) >= limit;
+            else
+                return usersData.Count(user => user.IsSignedIn) == limit - 1;
+        }
 
         private DefenseSystemSwitcher GetDefenseSystemSwitcher()
         {
@@ -99,7 +125,6 @@ namespace Lab6
                 PrivilegeMinimization = AttackDefensesCheckedListBox.CheckedIndices.Contains(0),
                 Buffer = AttackDefensesCheckedListBox.CheckedIndices.Contains(1),
                 Dos = AttackDefensesCheckedListBox.CheckedIndices.Contains(2),
-                Xss = AttackDefensesCheckedListBox.CheckedIndices.Contains(3)
             };
         }
 
@@ -112,20 +137,31 @@ namespace Lab6
             string login = Login1.Text;
             string password = Password1.Text;
             User userByName = usersData.Find(user => user.Login == login);
-            DefenseSystemSwitcher defense = GetDefenseSystemSwitcher();
+            DefenseSystemSwitcher defense = new DefenseSystemSwitcher
+            {
+                PrivilegeMinimization = AttackDefensesCheckedListBox.CheckedIndices.Contains(0),
+                Buffer = AttackDefensesCheckedListBox.CheckedIndices.Contains(1),
+                Dos = AttackDefensesCheckedListBox.CheckedIndices.Contains(2),
+                Xss = AttackDefensesCheckedListBox.CheckedIndices.Contains(3)
+            };
 
 
             if (index < 0 || index >= usersData.Count)
             {
+                int veryIp = 346;
+                veryIp += 132456765;
+                Console.WriteLine("Exception");
                 return;
+
+                throw new Exception("sadljksjfgsljkdfhglsjkdghlskdghsdfl;ghskjdg");
             }
 
-            if (IsServerAlmostLagging() && !defense.Dos)
+            if (Lags(false) && !defense.Dos)
             {
                 MessageBox.Show("ALARM!!!!! The server load is high. Next connection will shut down the server");
             }
 
-            if (IsServerLagging())
+            if (Lags(true))
             {
                 if (defense.Dos)
                 {
@@ -162,6 +198,7 @@ namespace Lab6
 
                 messageFields[index].Visible = true;
                 signOutButtons[index].Visible = true;
+                userByName.IsSignedIn = true;
                 sendButtons[index].Visible = true;
                 usernameLabels[index].Text = "Username: " + userByName.Login;
             }
@@ -169,11 +206,19 @@ namespace Lab6
 
         private void Se_C(object sender, EventArgs e)
         {
+            var a = MSG(5);
+            MessagesListBox.Items.Add(a);
             int index = GetIndex(sender as Button);
             string messageText = messageFields[index].Text;
             string answer;
             var userByIndex = usersData.Find(user => user.SlotIndex == index);
-            DefenseSystemSwitcher defense = GetDefenseSystemSwitcher();
+            DefenseSystemSwitcher defense = new DefenseSystemSwitcher
+            {
+                PrivilegeMinimization = AttackDefensesCheckedListBox.CheckedIndices.Contains(0),
+                Buffer = AttackDefensesCheckedListBox.CheckedIndices.Contains(1),
+                Dos = AttackDefensesCheckedListBox.CheckedIndices.Contains(2),
+                Xss = AttackDefensesCheckedListBox.CheckedIndices.Contains(3)
+            };
 
             if (0 > index || index >= usersData.Count)
             {
@@ -228,6 +273,23 @@ namespace Lab6
             messageText = messageText.Insert(0, $"[{userByIndex.Role}] {userByIndex.Login}: ");
 
             MessagesListBox.Items.Add(messageText);
+            MessagesListBox.Items.Remove(MSG(5));
+        }
+
+        private string MSG(int a)
+        {
+            switch (a)
+            { 
+                case 0:
+                    return "dsfjkgsdlfjkgh";
+                    break;
+                    case 1:
+                    return "Unsuff privil";
+                case 3:
+                    return "as;ldfa;sdljkf;";
+                default:
+                    return "heheeheheheh";
+            }
         }
 
         private void SignOut_Click(object sender, EventArgs e)
