@@ -1,8 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ExtendedNumerics;
+using ScientificCalculator.Calculator.ScientificCalculator;
+using System.ComponentModel;
 using System.Globalization;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace MauiScientificCalculator.ViewModels;
 
@@ -18,30 +21,39 @@ class CalculatorInternalState
     public bool constantNumberPressed;
 }
 
-[INotifyPropertyChanged]
-#pragma warning disable MVVMTK0032 // Inherit from ObservableObject instead of using [INotifyPropertyChanged]
-internal partial class CalculatorPageViewModel
-#pragma warning restore MVVMTK0032 // Inherit from ObservableObject instead of using [INotifyPropertyChanged]
+internal partial class CalculatorPageViewModel : ObservableObject
 {
+    //public event PropertyChangedEventHandler? PropertyChanged;
+    private ICalculator calculator;
+
     Random rnd = new Random();
+
     string first = "0";
-    BinaryOperations firstOp = BinaryOperations.Plus;
     string second = "0";
-    BinaryOperations secondOp = BinaryOperations.Plus;
     string trailing = "0";
+    
+    BinaryOperations firstOp = BinaryOperations.Plus;
+    BinaryOperations secondOp = BinaryOperations.Plus;
+
     [ObservableProperty]
     string display;
-    CalculatorState state = CalculatorState.INITIAL;
     ToDisplay toDisplay = ToDisplay.FIRST;
+    
+    CalculatorState state = CalculatorState.INITIAL;
+    
+    bool constantNumberPressed = false;
 
     const int placesNumber = 45;
 
-    bool constantNumberPressed = false;
+    [ObservableProperty]
+    string expressionString = "";
+
 
     Stack<CalculatorInternalState> states = new Stack<CalculatorInternalState>();
 
     public CalculatorPageViewModel()
     {
+        calculator = new JavaMathCalculator();
         Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         Display = first;
     }
@@ -63,9 +75,20 @@ internal partial class CalculatorPageViewModel
     }
 
     [RelayCommand]
-    private void ReceiveInput(string input)
+    private async Task ReceiveInput(string input)
     {
+        ExpressionString += input;
         Display = "zhdi";
+
+        if (input == "cos")
+        {
+            var decimalOperand = GetBigDecimal(first);
+            
+            var result = await Task.Run(() => BigDecimal.Round(BigDecimal.Cos(decimalOperand, placesNumber), placesNumber).ToString());
+            first = result;
+            DisplayNumber();
+            return;
+        }
 
         if (isNumberInput(input) && !constantNumberPressed)
             HandleNumberInput(input);
@@ -87,7 +110,7 @@ internal partial class CalculatorPageViewModel
         else if (isBinaryOperation(input) && state != CalculatorState.ERROR)
             try
             {
-                HandleBinaryOperation(input);
+                await HandleBinaryOperation(input);
             }
             catch (InvalidDataException)
             {
@@ -100,7 +123,7 @@ internal partial class CalculatorPageViewModel
         else if (isUnaryOperation(input))
             try
             {
-                HandleUnaryOperation(input);
+                await HandleUnaryOperation(input);
             }
             catch (InvalidDataException)
             {
@@ -191,7 +214,7 @@ internal partial class CalculatorPageViewModel
                 resulting_display = display;
         }
         else
-            resulting_display = (display == "0" ? "" : display) + input;
+            resulting_display = (display == "0" || display == "-0" ? "" : display) + input;
 
         return resulting_display;
     }
@@ -203,18 +226,20 @@ internal partial class CalculatorPageViewModel
 
     private void HandleEqual(string input)
     {
-        var resultFOp1S = GetOperationResult(first, firstOp, second);
-        var resultSOp2T = GetOperationResult(second, secondOp, trailing);
-        var resultFOp1SOp2T = GetOperationResult(first, firstOp, resultSOp2T);
+        var resultFOp1S = GetOperationResult(first, firstOp, second); // 1 + 2
+        var resultSOp2T = GetOperationResult(second, secondOp, trailing); // 2 * 3
+        var resultFOp1SOp2T = GetOperationResult(first, firstOp, resultSOp2T); // 1 + 2 * 3
         switch (state)
         {
             case CalculatorState.TRAILING:
                 first = resultFOp1SOp2T;
-                second = resultSOp2T;
+                firstOp = secondOp;
+                second = trailing;
                 break;
             case CalculatorState.TRANSITION_FROM_TRAILING:
                 first = resultFOp1SOp2T;
-                second = resultSOp2T;
+                firstOp = secondOp;
+                second = trailing;
                 break;
             case CalculatorState.ERROR:
                 return;
@@ -226,25 +251,22 @@ internal partial class CalculatorPageViewModel
         state = CalculatorState.EQUAL;
     }
 
-    private string GetOperationResult(string first, BinaryOperations op, string second)
+    private async Task<string> GetOperationResult(string first, BinaryOperations op, string second)
     {
-        var a = GetBigDecimal(first);
-        var b = GetBigDecimal(second);
-
         switch (op)
         {
             case BinaryOperations.Plus:
-                return BigDecimal.Round((a + b), placesNumber).ToString();
+                return await calculator.Plus(first, second);
             case BinaryOperations.Minus:
-                return BigDecimal.Round((a - b), placesNumber).ToString();
+                return await calculator.Minus(first, second);
             case BinaryOperations.Mult:
-                return BigDecimal.Round((a * b), placesNumber).ToString();
+                return await calculator.Mult(first, second);
             case BinaryOperations.Div:
-                return BigDecimal.Round((a / b), placesNumber).ToString();
+                return await calculator.Div(first, second);
             case BinaryOperations.YsPower:
-                return Pow(a, second, b);
+                return await calculator.YsPower(first, second);
             case BinaryOperations.NthRoot:
-                return NthRoot(a, (int)b);
+                return await calculator.NthRoot(first, second);
             default:
                 throw new Exception("Invalid operation for results! BAD");
         }
@@ -336,13 +358,10 @@ internal partial class CalculatorPageViewModel
         return binaryOperators.ContainsKey(input);
     }
 
-    private void HandleBinaryOperation(string input)
+    private async Task HandleBinaryOperation(string input)
     {
         constantNumberPressed = false;
         BinaryOperations input_operation = GetBinaryOperation(input);
-        var resultFOp1S = GetOperationResult(first, firstOp, second);
-        var resultSOp2T = GetOperationResult(second, secondOp, trailing);
-        var resultFOp1SOp2T = GetOperationResult(first, firstOp, resultSOp2T);
 
         switch (state)
         {
@@ -372,6 +391,8 @@ internal partial class CalculatorPageViewModel
                 }
                 else
                 {
+                    var resultFOp1S = await GetOperationResult(first, firstOp, second);
+                    var resultSOp2T = await GetOperationResult(second, secondOp, trailing);
                     // simple operation case: move to TRANSITION
                     first = resultFOp1S;
                     firstOp = input_operation;
@@ -384,6 +405,8 @@ internal partial class CalculatorPageViewModel
                 if (isSimpleOperation(input_operation))
                 {
                     // simple operation case: move back to TRANSITION
+                    var resultSOp2T = await GetOperationResult(second, secondOp, trailing);
+                    var resultFOp1SOp2T = await GetOperationResult(first, firstOp, resultSOp2T);
                     first = resultFOp1SOp2T;
                     firstOp = input_operation;
                     second = resultFOp1SOp2T;
@@ -400,6 +423,8 @@ internal partial class CalculatorPageViewModel
                 if (isSimpleOperation(input_operation))
                 {
                     // simple operation case: move back to TRANSITION
+                    var resultSOp2T = await GetOperationResult(second, secondOp, trailing);
+                    var resultFOp1SOp2T = await GetOperationResult(first, firstOp, resultSOp2T);
                     first = resultFOp1SOp2T;
                     firstOp = input_operation;
                     second = resultFOp1SOp2T;
@@ -409,6 +434,7 @@ internal partial class CalculatorPageViewModel
                 else
                 {
                     // complex operation case: move back to TRAILING
+                    var resultSOp2T = await GetOperationResult(second, secondOp, trailing);
                     second = resultSOp2T;
                     secondOp = input_operation;
                     trailing = resultSOp2T;
@@ -452,36 +478,36 @@ internal partial class CalculatorPageViewModel
         return unaryOperators.ContainsKey(input);
     }
 
-    private void HandleUnaryOperation(string input)
+    private async Task HandleUnaryOperation(string input)
     {
         switch (state)
         {
             case CalculatorState.INITIAL:
-                first = PerfomUnaryOperation(first, input);
+                first = await PerfomUnaryOperation(first, input);
                 break;
             case CalculatorState.TRANSITION_FROM_INITIAL:
-                first = PerfomUnaryOperation(first, input);
+                first = await PerfomUnaryOperation(first, input);
                 break;
             case CalculatorState.TRANSITION:
-                second = PerfomUnaryOperation(second, input);
+                second = await PerfomUnaryOperation(second, input);
                 break;
             case CalculatorState.TRANSITION_FROM_TRANSITION:
-                second = PerfomUnaryOperation(second, input);
+                second = await PerfomUnaryOperation(second, input);
                 break;
             case CalculatorState.TRAILING:
-                trailing = PerfomUnaryOperation(trailing, input);
+                trailing = await PerfomUnaryOperation(trailing, input);
                 break;
             case CalculatorState.TRANSITION_FROM_TRAILING:
-                trailing = PerfomUnaryOperation(trailing, input);
+                trailing = await PerfomUnaryOperation(trailing, input);
                 break;
             case CalculatorState.EQUAL:
-                first = PerfomUnaryOperation(first, input);
+                first = await PerfomUnaryOperation(first, input);
                 break;
             case CalculatorState.ERROR:
                 if (input == "π" || input == "e" || input == "rand" || input == "+/-")
                 {
                     SetToBaseState(true);
-                    first = PerfomUnaryOperation(first, input);
+                    first = await PerfomUnaryOperation(first, input);
                 }
                 break;
             default:
@@ -489,79 +515,61 @@ internal partial class CalculatorPageViewModel
         }
     }
 
-    private string PerfomUnaryOperation(string operand, string input)
+    private async Task<string> PerfomUnaryOperation(string operand, string input)
     {
-        var decimalOperand = GetBigDecimal(operand);
 
         var operation = unaryOperators[input];
 
         switch (operation)
         {
             case UnaryOperations.Sign:
-                if (operand[0] != '-')
-                    return operand.Insert(0, "-");
-                else 
-                    return operand.Remove(0,1);
+                return calculator.Sign(operand);
 
             case UnaryOperations.Percent:
-                return BigDecimal.Round((decimalOperand / 100), placesNumber).ToString();
+                return await calculator.Percent(operand);
             case UnaryOperations.Comma:
-
-                if (!operand.Contains(','))
-                    return operand.Insert(operand.Length, ".");
-                else 
-                    return operand;
+                return calculator.Comma(operand);
 
             case UnaryOperations.TenPower:
-                return Pow(10, operand, decimalOperand);
+                return await calculator.TenPower(operand);
                 
             case UnaryOperations.Cube:
-                return Pow(decimalOperand, "3", 3);
-                
+                return await calculator.Cube(operand);
+
             case UnaryOperations.Square:
-                return Pow(decimalOperand, "2", 2);
+                return await calculator.Square(operand);
 
             case UnaryOperations.Invert:
-                if (decimalOperand.Sign == 0)
-                    throw new InvalidDataException("Error: division by zero");
-                return BigDecimal.Round((1 / decimalOperand), placesNumber).ToString();
+                return await calculator.Invert(operand);
                 
             case UnaryOperations.SquareRoot:
-                return NthRoot(decimalOperand, 2);
-                
+                return await calculator.SquareRoot(operand);
+
+
             case UnaryOperations.CubeRoot:
-                // No 3throot for negative numbers in BigDecimal
-                return NthRoot(decimalOperand, 3);
-                
+                return await calculator.CubeRoot(operand);
+
+
             case UnaryOperations.NaturalLogarithm:
-                if (decimalOperand.IsNegative())
-                    throw new InvalidDataException("Invalid logatithm arument");
-                return Math.Round(Math.Log((double)decimalOperand), 15).ToString();
+                return await calculator.NaturalLogarithm(operand);
 
             case UnaryOperations.DecimalLogarithm:
-                if (decimalOperand.IsNegative())
-                    throw new InvalidDataException("Invalid logatithm arument");
-                
-                return Math.Round(Math.Log10((double)decimalOperand), 15).ToString();
+                return await calculator.DecimalLogarithm(operand);
 
             case UnaryOperations.Sin:
-                if (decimalOperand.IsNegative())
-                    return BigDecimal.Round(BigDecimal.Negate(BigDecimal.Sin(BigDecimal.Negate(decimalOperand), placesNumber)), placesNumber).ToString();
-                return BigDecimal.Round(BigDecimal.Sin(decimalOperand, placesNumber), placesNumber).ToString();
-            
+                return await calculator.Sin(operand);
+
+
             case UnaryOperations.Cos:
-                return BigDecimal.Round(BigDecimal.Cos(decimalOperand, placesNumber), placesNumber).ToString();
-            
+                return await calculator.Cos(operand);
+
+
             case UnaryOperations.Tan:
-                
-                if (BigDecimal.Abs(decimalOperand - BigDecimal.GetPiDigits(placesNumber) / 2) <= Math.Pow(0.1, placesNumber) ||
-                    BigDecimal.Abs(decimalOperand - 3 * BigDecimal.GetPiDigits(placesNumber) / 2) <= Math.Pow(0.1, placesNumber))
-                    throw new InvalidDataException("Invalid tan arument");
-                return BigDecimal.Round(BigDecimal.Tan(decimalOperand, 10), placesNumber).ToString();
+                return await calculator.Tan(operand);
 
             case UnaryOperations.EulersNumber:
                 constantNumberPressed = true;
-                return BigDecimal.Round(BigDecimal.E, placesNumber).ToString();
+                return await calculator.EulersNumber();
 
             case UnaryOperations.Sinh:
                 return BigDecimal.Round(BigDecimal.Sinh(decimalOperand), placesNumber).ToString();
