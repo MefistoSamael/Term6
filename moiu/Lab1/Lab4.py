@@ -4,7 +4,7 @@ from Lab1 import MyMatrixInversion
 
 
 
-def double_simplex_method(c: np.ndarray, A: np.ndarray, b:np.ndarray, B:list):
+def dual_simplex_method(c: np.ndarray, A: np.ndarray, b:np.ndarray, B:list):
     firstLap = True
     
     zz = 1

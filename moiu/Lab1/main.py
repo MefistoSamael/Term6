@@ -1,6 +1,6 @@
 import numpy as np
 from Lab3 import MySimplexMethodStartPhase
-from Lab4 import double_simplex_method
+from Lab4 import dual_simplex_method
 
 
 
@@ -13,6 +13,6 @@ if __name__ == "__main__":
     B = [4,5]
     
     
-    result = double_simplex_method(c, A, b, B)
+    result = dual_simplex_method(c, A, b, B)
     print("\n\n\n result")
     print(result)
