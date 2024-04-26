@@ -5,6 +5,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
 {
     public class JavaMathCalculator : ICalculator
     {
+        BigDecimal doublePi = new BigDecimal(ExtendedNumerics.BigDecimal.Pi.ToString()).Add(new BigDecimal(ExtendedNumerics.BigDecimal.Pi.ToString()));
         BigInteger ComparePower = new BigInteger("99999");
         private readonly Random random = new Random();
         int SCALE = 45;
@@ -433,6 +434,8 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
         public async Task<string> Sin(string first)
         {
             var x = new BigDecimal(first);
+            x = await ToDoublePiPromezhutok(x);
+            
             BigDecimal lastVal = x.Add(BigDecimal.One);
             BigDecimal currentValue = x;
             BigDecimal xSquared = await Task.Run(() => x.Multiply(x));
@@ -465,9 +468,19 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
             }
             return currentValue.ToEngineeringString();
         }
+
+        private async Task<BigDecimal> ToDoublePiPromezhutok(BigDecimal x)
+        {
+            var SkolkoOtnyant = await Task.Run(() => x.Divide(doublePi, new MathContext(SCALE, RoundingMode.Down)).SetScale(0, RoundingMode.Down));
+
+            return x.Subtract(doublePi.Multiply(SkolkoOtnyant));
+        }
+
         public async Task<string> Cos(string first)
         {
             var x = new BigDecimal(first);
+
+            x = await ToDoublePiPromezhutok(x);
             BigDecimal currentValue = BigDecimal.One;
             BigDecimal lastVal = currentValue.Add(BigDecimal.One);
             BigDecimal xSquared = await Task.Run(() => x.Multiply(x));
