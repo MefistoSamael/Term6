@@ -26,6 +26,31 @@
             Grid.RowSpan="4"
             Grid.ColumnSpan="5"/>
 
+        <!-- Expression Area -->
+        <Frame
+            HasShadow="False"
+            Padding="6,0,4,0"
+            Margin="12"
+            BorderColor="{StaticResource PrimaryColor}"
+            BackgroundColor="#2C3240"
+            HorizontalOptions="EndAndExpand"
+            VerticalOptions="EndAndExpand"
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="5">
+            <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
+                <Label
+                    Text="{Binding Expression, Mode=OneWay}"
+                    LineHeight="1.5"
+                    VerticalTextAlignment="Center"
+                    HorizontalOptions="StartAndExpand"
+                    LineBreakMode="WordWrap"
+                    VerticalOptions="Center"
+                    Style="{StaticResource ResultLabelStyle}">
+                </Label>
+            </ScrollView>
+        </Frame>
+
         <!-- Answer Row -->
 
         <Grid            
@@ -35,7 +60,7 @@
             Grid.ColumnSpan="5">
 
             <Label
-                Text="="
+                Text=" "
                 VerticalOptions="Center"
                 VerticalTextAlignment="Center"
                 Style="{StaticResource EqualsLabelStyle}"

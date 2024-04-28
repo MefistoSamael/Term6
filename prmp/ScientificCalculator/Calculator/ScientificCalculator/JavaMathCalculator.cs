@@ -44,7 +44,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
             var ft = new BigDecimal(first);
             var sd = new BigDecimal(second);
 
-            return await Task.Run(() => ft.Divide(sd)!.ToEngineeringString()!);
+            return await Task.Run(() => ft.Divide(sd, SCALE, ROUNDING_MODE)!.ToEngineeringString()!);
         }
         public async Task<string> YsPower(string first, string second)
         {

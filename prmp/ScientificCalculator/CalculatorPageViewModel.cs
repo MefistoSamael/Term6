@@ -4,6 +4,7 @@ using ExtendedNumerics;
 using ScientificCalculator.Calculator.ScientificCalculator;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -26,6 +27,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
     //public event PropertyChangedEventHandler? PropertyChanged;
     private ICalculator calculator;
 
+
     Random rnd = new Random();
 
     string first = "0";
@@ -37,6 +39,10 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
     [ObservableProperty]
     string display;
+
+    [ObservableProperty]
+    string expression = "";
+
     ToDisplay toDisplay = ToDisplay.FIRST;
 
     CalculatorState state = CalculatorState.INITIAL;
@@ -44,9 +50,6 @@ internal partial class CalculatorPageViewModel : ObservableObject
     bool constantNumberPressed = false;
 
     const int placesNumber = 45;
-
-    [ObservableProperty]
-    string expressionString = "";
 
 
     Stack<CalculatorInternalState> states = new Stack<CalculatorInternalState>();
@@ -78,21 +81,12 @@ internal partial class CalculatorPageViewModel : ObservableObject
     [RelayCommand]
     private async Task ReceiveInput(string input)
     {
-        ExpressionString += input;
         Display = "zhdi";
 
-        if (input == "cos")
-        {
-            var decimalOperand = GetBigDecimal(first);
-
-            var result = await Task.Run(() => BigDecimal.Round(BigDecimal.Cos(decimalOperand, placesNumber), placesNumber).ToString());
-            first = result;
-            DisplayNumber();
-            return;
-        }
-
         if (isNumberInput(input) && !constantNumberPressed)
+        {
             HandleNumberInput(input);
+        }
         else if (isEqual(input))
             try
             {
@@ -148,7 +142,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
             }
         else if (isBrace(input) && state != CalculatorState.ERROR)
             await HandleBrace(input);
-        else if (constantNumberPressed)
+        else if (constantNumberPressed || (isBrace(input) && state == CalculatorState.ERROR))
         { }
         else
             throw new InvalidOperationException("invalid operation");
@@ -161,6 +155,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
         state = CalculatorState.ERROR;
         toDisplay = ToDisplay.FIRST;
         first = "Error";
+        Expression = "";
     }
 
     private bool isNumberInput(string input)
@@ -192,8 +187,8 @@ internal partial class CalculatorPageViewModel : ObservableObject
                 state = CalculatorState.TRANSITION_FROM_TRAILING;
                 break;
             case CalculatorState.EQUAL:
-                first = isDecimalPointInput(input) ? "0" + input : input;
-                state = CalculatorState.TRANSITION_FROM_INITIAL;
+                SetToBaseState(false);
+                Expression = "";
                 break;
             case CalculatorState.TRANSITION_FROM_INITIAL:
                 first = GetResultingDisplay(first, input);
@@ -239,31 +234,44 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
     private async Task HandleEqual(string input)
     {
+        if (states.Count != 0)
+            SetToErrorState();
         switch (state)
         {
             case CalculatorState.TRAILING:
-                var sOp2t = await GetOperationResult(second, secondOp, trailing); // 2 * 3
-                var fOp1SOp2t = await GetOperationResult(first, firstOp, sOp2t); // 1 + 2 * 3
-                first = fOp1SOp2t;
-                firstOp = secondOp;
-                second = trailing;
-                break;
             case CalculatorState.TRANSITION_FROM_TRAILING:
                 var sOp2T = await GetOperationResult(second, secondOp, trailing); // 2 * 3
                 var fOp1SOp2T = await GetOperationResult(first, firstOp, sOp2T); // 1 + 2 * 3
                 first = fOp1SOp2T;
                 firstOp = secondOp;
                 second = trailing;
+
+                // Могут сломать унарные операторы
+                if (Expression.Length > 0 && Expression.Last() != ')')
+                    Expression += trailing;
                 break;
             case CalculatorState.ERROR:
+                return;
+            case CalculatorState.INITIAL:
+            case CalculatorState.TRANSITION_FROM_INITIAL:
+                SetToBaseState(false);
+                Expression = "";
                 return;
             default:
                 var fOp1S = await GetOperationResult(first, firstOp, second); // 1 + 2
                 first = fOp1S;
+
+                // Могут сломать унарные операторы
+
+                if (Expression.Length > 0 && Expression.Last() != ')')
+                    Expression += second;
                 break;
         }
         toDisplay = ToDisplay.FIRST;
         state = CalculatorState.EQUAL;
+
+        
+        Expression += "=";
     }
 
     private async Task<string> GetOperationResult(string first, BinaryOperations op, string second)
@@ -299,59 +307,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
     private void HandleReset(string input)
     {
-        switch (state)
-        {
-            case CalculatorState.INITIAL:
-                SetToBaseState(true);
-                return;
-            case CalculatorState.TRANSITION_FROM_INITIAL:
-                if (first != "0")
-                {
-                    first = "0";
-                }
-                else
-                {
-                    SetToBaseState(true);
-                }
-                break;
-            case CalculatorState.TRANSITION:
-                first = "0";
-                state = CalculatorState.TRANSITION_FROM_INITIAL;
-                break;
-            case CalculatorState.TRANSITION_FROM_TRANSITION:
-                if (second != "0")
-                {
-                    second = "0";
-                }
-                else
-                {
-                    SetToBaseState(true);
-                }
-                break;
-            case CalculatorState.TRAILING:
-                trailing = "0";
-                state = CalculatorState.TRANSITION_FROM_TRAILING;
-                break;
-            case CalculatorState.TRANSITION_FROM_TRAILING:
-                if (trailing != "0")
-                {
-                    trailing = "0";
-                }
-                else
-                {
-                    SetToBaseState(true);
-                }
-                break;
-            case CalculatorState.EQUAL:
-                first = "0";
-                state = CalculatorState.TRANSITION_FROM_INITIAL;
-                break;
-            case CalculatorState.ERROR:
-                SetToBaseState(true);
-                break;
-            default:
-                throw new Exception("Invalid state! BAD.");
-        }
+        SetToBaseState(true);
     }
 
     private void SetToBaseState(bool clearStates)
@@ -365,7 +321,10 @@ internal partial class CalculatorPageViewModel : ObservableObject
         state = CalculatorState.INITIAL;
         constantNumberPressed = false;
         if (clearStates)
+        {
             states = new();
+            Expression = "";
+        }    
     }
 
     private bool isBinaryOperation(string input)
@@ -378,15 +337,13 @@ internal partial class CalculatorPageViewModel : ObservableObject
         constantNumberPressed = false;
         BinaryOperations input_operation = GetBinaryOperation(input);
 
+        string operand = "";
+
         switch (state)
         {
             case CalculatorState.INITIAL:
-                second = first;
-                firstOp = input_operation;
-                state = CalculatorState.TRANSITION;
-                toDisplay = ToDisplay.SECOND;
-                break;
             case CalculatorState.TRANSITION_FROM_INITIAL:
+                operand = first;
                 second = first;
                 firstOp = input_operation;
                 state = CalculatorState.TRANSITION;
@@ -394,18 +351,22 @@ internal partial class CalculatorPageViewModel : ObservableObject
                 break;
             case CalculatorState.TRANSITION:
                 firstOp = input_operation;
+                if (Expression.Length > 0 && binaryOperators.Keys.Contains(Expression.Last().ToString()))
+                    Expression = Expression.Remove(Expression.Length - 1);
                 break;
             case CalculatorState.TRANSITION_FROM_TRANSITION:
                 if (isComplexOperation(input_operation) && isSimpleOperation(firstOp))
                 {
                     // complex operation case: move to TRAILING
                     secondOp = input_operation;
+                    operand = second;
                     trailing = second;
                     toDisplay = ToDisplay.TRAILING;
                     state = CalculatorState.TRAILING;
                 }
                 else
                 {
+                    operand = second;
                     var resultFOp1S = await GetOperationResult(first, firstOp, second);
                     var resultSOp2T = await GetOperationResult(second, secondOp, trailing);
                     // simple operation case: move to TRANSITION
@@ -427,11 +388,13 @@ internal partial class CalculatorPageViewModel : ObservableObject
                     second = resultFOp1SOp2T;
                     toDisplay = ToDisplay.FIRST;
                     state = CalculatorState.TRANSITION;
+                    operand = trailing;
                 }
                 else
                 {
                     // complex operation case: stay in TRAILING
                     secondOp = input_operation;
+                    operand = trailing;
                 }
                 break;
             case CalculatorState.TRANSITION_FROM_TRAILING:
@@ -445,6 +408,7 @@ internal partial class CalculatorPageViewModel : ObservableObject
                     second = resultFOp1SOp2T;
                     toDisplay = ToDisplay.FIRST;
                     state = CalculatorState.TRANSITION;
+                    operand = trailing;
                 }
                 else
                 {
@@ -455,18 +419,25 @@ internal partial class CalculatorPageViewModel : ObservableObject
                     trailing = resultSOp2T;
                     toDisplay = ToDisplay.SECOND;
                     state = CalculatorState.TRAILING;
+                    operand = trailing;
                 }
                 break;
             case CalculatorState.EQUAL:
                 firstOp = input_operation;
                 second = first;
                 state = CalculatorState.TRANSITION;
+                Expression = first;
                 break;
             case CalculatorState.ERROR:
                 break;
             default:
                 throw new Exception("Invalid state! BAD.");
         }
+
+        if (Expression.Length == 0 || (Expression.Length > 0 && Expression.Last() != ')'))
+            Expression += operand;
+
+        Expression += input;
     }
 
     private bool isComplexOperation(BinaryOperations input_operation)
@@ -586,15 +557,6 @@ internal partial class CalculatorPageViewModel : ObservableObject
                 constantNumberPressed = true;
                 return calculator.EulersNumber();
 
-            //case UnaryOperations.Sinh:
-            //    return BigDecimal.Round(BigDecimal.Sinh(decimalOperand), placesNumber).ToString();
-
-            //case UnaryOperations.Cosh:
-            //    return BigDecimal.Round(BigDecimal.Cosh(decimalOperand), placesNumber).ToString();
-
-            //case UnaryOperations.Tanh:
-            //    return BigDecimal.Round(BigDecimal.Tanh(decimalOperand), placesNumber).ToString();
-
             case UnaryOperations.Pi:
                 constantNumberPressed = true;
                 return calculator.Pi();
@@ -610,49 +572,6 @@ internal partial class CalculatorPageViewModel : ObservableObject
 
     }
 
-    private string NthRoot(BigDecimal decimalOperand, int root)
-    {
-        if (root % 2 != 0)
-        {
-            if (decimalOperand.IsNegative())
-                return BigDecimal.Round(BigDecimal.Negate(BigDecimal.NthRoot(BigDecimal.Negate(decimalOperand), root, placesNumber)), placesNumber).ToString();
-            else
-                return BigDecimal.Round(BigDecimal.NthRoot(decimalOperand, root, placesNumber), placesNumber).ToString();
-        }
-        else
-        {
-            if (decimalOperand.IsNegative())
-                throw new InvalidDataException("Negative numver in odd root");
-
-            return BigDecimal.Round(BigDecimal.NthRoot(decimalOperand, root, placesNumber), placesNumber).ToString();
-        }
-
-    }
-
-    private string GetFractionalPart(string number)
-    {
-        return number.Substring(number.IndexOf(".") + 1);
-    }
-
-    private string Pow(BigDecimal powBase, string exponent, BigDecimal decimalExponent)
-    {
-        if (exponent.IndexOf('.') is int index and not -1)
-        {
-            // x^5.25 will be handled like 100thRoot(x^525)
-            int powerOfTen = GetFractionalPart(exponent).Length;
-            var a = exponent.Remove(index, 1);
-            var exp = BigInteger.Parse(a);
-            var root = (int)Math.Pow(10, powerOfTen);
-            BigDecimal basa = BigDecimal.Pow(powBase, exp);
-            var nthroot = BigDecimal.NthRoot(basa, root, placesNumber);
-            return BigDecimal.Round(nthroot, placesNumber).ToString();
-        }
-        else
-        {
-            return BigDecimal.Round(BigDecimal.Pow(powBase, (BigInteger)decimalExponent), placesNumber).ToString();
-        }
-    }
-
     private bool isBrace(string input)
     {
         return input == "(" || input == ")";
@@ -662,6 +581,10 @@ internal partial class CalculatorPageViewModel : ObservableObject
     {
         if (input == "(")
         {
+            if (state == CalculatorState.EQUAL)
+            {
+                Expression = "";
+            }
             states.Push(new CalculatorInternalState
             {
                 first = first,
@@ -674,9 +597,28 @@ internal partial class CalculatorPageViewModel : ObservableObject
                 state = state,
             });
             SetToBaseState(false);
+            Expression += "(";
         }
         else
         {
+            string operand = "";
+
+            switch (state)
+            {
+                case CalculatorState.INITIAL:
+                case CalculatorState.TRANSITION_FROM_INITIAL:
+                    operand = first;
+                    break;
+                case CalculatorState.TRANSITION:
+                case CalculatorState.TRANSITION_FROM_TRANSITION:
+                    operand = second;
+                    break;
+                case CalculatorState.TRAILING:
+                case CalculatorState.TRANSITION_FROM_TRAILING:
+                    operand = trailing;
+                    break;
+            }
+
             if (states.Count == 0)
                 return;
 
@@ -691,20 +633,14 @@ internal partial class CalculatorPageViewModel : ObservableObject
             switch (state)
             {
                 case CalculatorState.INITIAL:
-                    first = answer;
-                    break;
                 case CalculatorState.TRANSITION_FROM_INITIAL:
                     first = answer;
                     break;
                 case CalculatorState.TRANSITION:
-                    second = answer;
-                    break;
                 case CalculatorState.TRANSITION_FROM_TRANSITION:
                     second = answer;
                     break;
                 case CalculatorState.TRAILING:
-                    trailing = answer;
-                    break;
                 case CalculatorState.TRANSITION_FROM_TRAILING:
                     trailing = answer;
                     break;
@@ -716,6 +652,8 @@ internal partial class CalculatorPageViewModel : ObservableObject
                 default:
                     throw new Exception("Invalid state! BAD.");
             }
+            Expression += operand;
+            Expression += ")";
         }
     }
 
