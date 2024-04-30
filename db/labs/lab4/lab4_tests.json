@@ -1,4 +1,4 @@
-{
+[{
     "type": "CREATE",
     "table": "Test1",
     "columns": [
@@ -14,6 +14,7 @@
     ],
     "primary": "Id"
 }
+,
 
 {
     "type": "CREATE",
@@ -42,6 +43,7 @@
         }
     ]
 }
+,
 
 
 {
@@ -56,6 +58,7 @@
         ]
     ]
 }
+,
 
 {
     "type": "INSERT",
@@ -69,7 +72,7 @@
         ]
     ]
 }
-
+,
 {
     "type": "INSERT",
     "table": "Test2",
@@ -84,7 +87,7 @@
         ]
     ]
 }
-
+,
 {
     "type": "INSERT",
     "table": "Test2",
@@ -100,7 +103,7 @@
     ]
 }
 
-
+,
 {
     "type": "UPDATE",
     "table": "Test2",
@@ -136,7 +139,7 @@
     ]
 }
 
-
+,
 {
     "type": "DELETE",
     "table": "Test2",
@@ -150,7 +153,7 @@
     ]
 }
 
-
+,
 {
     "type": "INSERT",
     "table": "Test2",
@@ -165,7 +168,7 @@
         ]
     ]
 }
-
+,
 {
     "type": "INSERT",
     "table": "Test2",
@@ -180,7 +183,7 @@
         ]
     ]
 }
-
+,
 
 {
     "type": "SELECT",
@@ -192,7 +195,7 @@
         "Test1"
     ]
 }
-
+,
 {
     "type": "SELECT",
     "columns": [
@@ -236,13 +239,14 @@
     ]
 }
 
-
+,
 {
     "type": "DROP",
     "table": "Test2"
 }
-
+,
 {
     "type": "DROP",
     "table": "Test1"
 }
+]
