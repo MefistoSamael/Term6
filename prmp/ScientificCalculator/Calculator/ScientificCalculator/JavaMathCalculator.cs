@@ -5,18 +5,24 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
 {
     public class JavaMathCalculator : ICalculator
     {
-        BigDecimal doublePi = new BigDecimal(ExtendedNumerics.BigDecimal.Pi.ToString()).Add(new BigDecimal(ExtendedNumerics.BigDecimal.Pi.ToString()));
+        BigDecimal e = new BigDecimal("2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274274663919320030599218174135966290435729003342952605956307381323286279434907632338298807531952510190115738341879307021540891499348841675092447614606680");
+        BigDecimal pi = new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091");
+        BigDecimal doublePi;
         BigInteger ComparePower = new BigInteger("99999");
         private readonly Random random = new Random();
         int SCALE = 45;
 
         RoundOptions ROUNDING_MODE = Java.Math.RoundOptions.Down;
-        public JavaMathCalculator() { }
+        public JavaMathCalculator()
+        {
+            doublePi = pi.Multiply(new BigDecimal(2));
+        }
 
 
         public JavaMathCalculator(int scale)
         {
             SCALE = scale;
+            doublePi = pi.Multiply(new BigDecimal(2));
         }
         public async Task<string> Plus(string first, string second)
         {
@@ -54,7 +60,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
 
             while (sec.CompareTo(ComparePower) >= 0)
             {
-                ans = await Task.Run( () => ans.Multiply(ft.Pow(ComparePower.IntValue())));
+                ans = await Task.Run(() => ans.Multiply(ft.Pow(ComparePower.IntValue())));
                 //ans = ans.Multiply(ft.Pow(ComparePower.IntValue()));
                 sec = sec.Subtract(ComparePower);
             }
@@ -435,7 +441,7 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
         {
             var x = new BigDecimal(first);
             x = await ToDoublePiPromezhutok(x);
-            
+
             BigDecimal lastVal = x.Add(BigDecimal.One);
             BigDecimal currentValue = x;
             BigDecimal xSquared = await Task.Run(() => x.Multiply(x));
@@ -522,17 +528,18 @@ namespace ScientificCalculator.Calculator.ScientificCalculator
         }
         public string EulersNumber()
         {
-            return ExtendedNumerics.BigDecimal.E.ToString();
+            return e;
         }
         public string Pi()
         {
-            return ExtendedNumerics.BigDecimal.Pi.ToString();
+            return pi.ToString();
         }
 
         public string Rand()
         {
             return random.Next().ToString();
         }
+        
     }
 }
 

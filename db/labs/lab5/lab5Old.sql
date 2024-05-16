@@ -57,9 +57,11 @@ datetime TIMESTAMP NOT NULL,' || CHR(10);
 END;
 /
 
-GenerateLoggingTable('TESTTABLE1')
-GenerateLoggingTable('TESTTABLE2')
-GenerateLoggingTable('TESTTABLE3')
+begin
+GenerateLoggingTable('TESTTABLE1');
+GenerateLoggingTable('TESTTABLE2');
+GenerateLoggingTable('TESTTABLE3');
+end;
 
 -- Create a procedure to generate triggers for logging
 CREATE OR REPLACE PROCEDURE CreateLoggingTriggers(p_table_name VARCHAR2) AS
@@ -157,9 +159,11 @@ BEGIN
 END;
 /
 
-CreateLoggingTriggers('TESTTABLE1')
-CreateLoggingTriggers('TESTTABLE2')
-CreateLoggingTriggers('TESTTABLE3')
+begin
+CreateLoggingTriggers('TESTTABLE1');
+CreateLoggingTriggers('TESTTABLE2');
+CreateLoggingTriggers('TESTTABLE3');
+end;
 
 -- 3
 CREATE OR REPLACE PACKAGE restore_package AS
@@ -285,92 +289,154 @@ CREATE OR REPLACE DIRECTORY my_directory AS '/opt/oracle';
 GRANT READ, WRITE ON DIRECTORY my_directory TO PUBLIC; 
 
 CREATE OR REPLACE PACKAGE create_report_package AS
-    FUNCTION create_report(title VARCHAR2, insert_count NUMBER, update_count NUMBER, delete_count NUMBER) RETURN VARCHAR2; 
-    PROCEDURE create_report_for_TestTable1(p_datetime TIMESTAMP);
-    PROCEDURE create_report_for_TestTable1;
-    PROCEDURE create_report_for_TestTable2(p_datetime TIMESTAMP);
-    PROCEDURE create_report_for_TestTable2;
-    PROCEDURE create_report_for_TestTable3(p_datetime TIMESTAMP);
-    PROCEDURE create_report_for_TestTable3;
+    FUNCTION create_report(title VARCHAR2, insert_count1  NUMBER, update_count1  NUMBER, delete_count1  NUMBER,
+     insert_count2  NUMBER, update_count2  NUMBER, delete_count2  NUMBER,
+     insert_count3  NUMBER, update_count3  NUMBER, delete_count3  NUMBER) RETURN VARCHAR2; 
+    PROCEDURE create_report_for_TestTable(p_datetime TIMESTAMP);
+    PROCEDURE create_report_for_TestTable;
 END create_report_package;
 /
 
 CREATE OR REPLACE PACKAGE BODY create_report_package AS
-    FUNCTION create_report (title IN VARCHAR2, insert_count IN NUMBER, update_count IN NUMBER, delete_count IN NUMBER) 
+    FUNCTION create_report (title IN VARCHAR2,
+     insert_count1 IN NUMBER, update_count1 IN NUMBER, delete_count1 IN NUMBER,
+     insert_count2 IN NUMBER, update_count2 IN NUMBER, delete_count2 IN NUMBER,
+     insert_count3 IN NUMBER, update_count3 IN NUMBER, delete_count3 IN NUMBER) 
     RETURN VARCHAR2 IS
         result VARCHAR(4000);
     BEGIN
-        result := '<!DOCTYPE html>' || CHR(10) ||
-                  '<html lang="en">' || CHR(10) ||
-                  '<head>' || CHR(10) ||
-                  '    <meta charset="UTF-8">' || CHR(10) ||
-                  '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' || CHR(10) ||
-                  '    <title>Report</title>' || CHR(10) ||
-                  '    <style>' || CHR(10) ||
-                  '        table {' || CHR(10) ||
-                  '            border-collapse: collapse;' || CHR(10) ||
-                  '            width: 50%;' || CHR(10) ||
-                  '        }' || CHR(10) ||
-                  '        th, td {' || CHR(10) ||
-                  '            border: 1px solid black;' || CHR(10) ||
-                  '            padding: 8px;' || CHR(10) ||
-                  '            text-align: left;' || CHR(10) ||
-                  '        }' || CHR(10) ||
-                  '        th {' || CHR(10) ||
-                  '            background-color: #f2f2f2;' || CHR(10) ||
-                  '        }' || CHR(10) ||
-                  '    </style>' || CHR(10) ||
-                  '</head>' || CHR(10) ||
-                  '<body>' || CHR(10) ||
-                  '<h2>' || title || '</h2>' || CHR(10) ||
-                  '<table>' || CHR(10) ||
-                  '    <tr>' || CHR(10) ||
-                  '        <th>Operation</th>' || CHR(10) ||
-                  '        <th>Count</th>' || CHR(10) ||
-                  '    </tr>' || CHR(10) ||
-                  '    <tr>' || CHR(10) ||
-                  '        <td>INSERT</td>' || CHR(10) ||
-                  '        <td>' || insert_count || '</td>' || CHR(10) ||
-                  '    </tr>' || CHR(10) ||
-                  '    <tr>' || CHR(10) ||
-                  '        <td>UPDATE</td>' || CHR(10) ||
-                  '        <td>' || update_count || '</td>' || CHR(10) ||
-                  '    </tr>' || CHR(10) ||
-                  '    <tr>' || CHR(10) ||
-                  '        <td>DELETE</td>' || CHR(10) ||
-                  '        <td>' || delete_count || '</td>' || CHR(10) ||
-                  '    </tr>' || CHR(10) ||
-                  '</table>' || CHR(10) ||
-                  '</body>' || CHR(10) ||
-                  '</html>' || CHR(10);
+        result :=  '<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Report</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif; /* Updated font */
+                            }
+                            table {
+                                border-collapse: separate;
+                                border-spacing: 0;
+                                width: 100%; /* Full width */
+                                margin: 20px 0;
+                                border-radius: 10px;
+                                overflow: hidden; /* Helps in applying border-radius */
+                            }
+                            th, td {
+                                border-right: 1px solid #dddddd; /* Lighter border color */
+                                padding: 12px 15px; /* Increased padding */
+                                text-align: left;
+                            }
+                            th:last-child, td:last-child {
+                                border-right: none;
+                            }
+                            th {
+                                background-color: #4CAF50; /* Dark green header */
+                                color: white;
+                            }
+                            tr:nth-child(even) {
+                                background-color: #f9f9f9; /* Zebra striping for rows */
+                            }
+                            tr:hover {
+                                background-color: #f1f1f1; /* Hover effect */
+                            }
+                        </style>
+                    </head>
+                    <body>
+                    <h2>' || title || '</h2>
+                    <table>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Count</th>
+                        </tr>
+                        <tr>
+                            <td>INSERTs count into tab1</td>
+                            <td>' || insert_count1 || '</td>
+                        </tr>
+                        <tr>
+                            <td>UPDATEs count into tab1</td>
+                            <td>' || update_count1 || '</td>
+                        </tr>
+                        <tr>
+                            <td>DELETEs count into tab1</td>
+                            <td>' || delete_count1 || '</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>INSERTs count into tab2</td>
+                            <td>' || insert_count2 || '</td>
+                        </tr>
+                        <tr>
+                            <td>UPDATEs count into tab2</td>
+                            <td>' || update_count2 || '</td>
+                        </tr>
+                        <tr>
+                            <td>DELETEs count into tab2</td>
+                            <td>' || delete_count2 || '</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>INSERTs count into tab3</td>
+                            <td>' || insert_count3 || '</td>
+                        </tr>
+                        <tr>
+                            <td>UPDATEs count into tab3</td>
+                            <td>' || update_count3 || '</td>
+                        </tr>
+                        <tr>
+                            <td>DELETEs count into tab3</td>
+                            <td>' || delete_count3 || '</td>
+                        </tr>
+                    </table>
+                    </body>
+                    </html>';
 
         DBMS_OUTPUT.PUT_LINE(result);
         RETURN result;
     END create_report;
 
 
-    PROCEDURE create_report_for_TestTable1(p_datetime TIMESTAMP) AS
+    PROCEDURE create_report_for_TestTable(p_datetime TIMESTAMP) AS
         v_file_handle UTL_FILE.FILE_TYPE;
         report VARCHAR2(4000);
         title VARCHAR2(100);
-        insert_count NUMBER;
-        update_count NUMBER;
-        delete_count NUMBER;
+        insert_count1 NUMBER;
+        update_count1 NUMBER;
+        delete_count1 NUMBER;
+        insert_count2 NUMBER;
+        update_count2 NUMBER;
+        delete_count2 NUMBER;
+        insert_count3 NUMBER;
+        update_count3 NUMBER;
+        delete_count3 NUMBER;
         result VARCHAR(4000);
     BEGIN
-        title := 'TestTable1 since ' || p_datetime;
-        SELECT COUNT(*) INTO insert_count FROM LoggingForTestTable1 WHERE operation = 'INSERT' AND p_datetime <= datetime;
-        SELECT COUNT(*) INTO update_count FROM LoggingForTestTable1 WHERE operation = 'UPDATE' AND p_datetime <= datetime;
-        SELECT COUNT(*) INTO delete_count FROM LoggingForTestTable1 WHERE operation = 'DELETE' AND p_datetime <= datetime;
+        title := 'Since ' || p_datetime;
+        SELECT COUNT(*) INTO insert_count1 FROM LoggingForTestTable1 WHERE operation = 'INSERT' AND p_datetime <= datetime;
+        SELECT COUNT(*) INTO update_count1 FROM LoggingForTestTable1 WHERE operation = 'UPDATE' AND p_datetime <= datetime;
+        SELECT COUNT(*) INTO delete_count1 FROM LoggingForTestTable1 WHERE operation = 'DELETE' AND p_datetime <= datetime;
+        SELECT COUNT(*) INTO insert_count2 FROM LoggingForTestTable2 WHERE operation = 'INSERT' AND p_datetime <= datetime;
+        SELECT COUNT(*) INTO update_count2 FROM LoggingForTestTable2 WHERE operation = 'UPDATE' AND p_datetime <= datetime;
+        SELECT COUNT(*) INTO delete_count2 FROM LoggingForTestTable2 WHERE operation = 'DELETE' AND p_datetime <= datetime;
+        SELECT COUNT(*) INTO insert_count3 FROM LoggingForTestTable3 WHERE operation = 'INSERT' AND p_datetime <= datetime;
+        SELECT COUNT(*) INTO update_count3 FROM LoggingForTestTable3 WHERE operation = 'UPDATE' AND p_datetime <= datetime;
+        SELECT COUNT(*) INTO delete_count3 FROM LoggingForTestTable3 WHERE operation = 'DELETE' AND p_datetime <= datetime;
 
-        result := create_report(title, insert_count, update_count, delete_count);
+        result := create_report(title, insert_count1, update_count1, delete_count1, insert_count2, update_count2, delete_count2, insert_count3, update_count3, delete_count3);
 
         v_file_handle := UTL_FILE.FOPEN('MY_DIRECTORY', 'report.html', 'W');
         UTL_FILE.PUT_LINE(v_file_handle, result);
         UTL_FILE.FCLOSE(v_file_handle);
-    END create_report_for_TestTable1;
+    END create_report_for_TestTable;
 
-    PROCEDURE create_report_for_TestTable1 AS
+    PROCEDURE create_report_for_TestTable AS
         v_file_handle UTL_FILE.FILE_TYPE;
         v_file_text CLOB;
         v_pattern VARCHAR2(100) := 'since ([^<]+)';
@@ -380,7 +446,7 @@ CREATE OR REPLACE PACKAGE BODY create_report_package AS
         v_file_handle := UTL_FILE.FOPEN('MY_DIRECTORY', 'report.html', 'r');    
         LOOP
             UTL_FILE.GET_LINE(v_file_handle, v_file_text);
-            IF v_line_number = 23 THEN
+            IF v_line_number = 40 THEN
                 EXIT;
             END IF;
             v_line_number := v_line_number + 1;
@@ -388,104 +454,18 @@ CREATE OR REPLACE PACKAGE BODY create_report_package AS
         UTL_FILE.FCLOSE(v_file_handle);
         
         v_match := REGEXP_SUBSTR(v_file_text, v_pattern, 1, 1, NULL, 1);
-        create_report_for_TestTable1(v_match);
-    END create_report_for_TestTable1;
-
-
-    PROCEDURE create_report_for_TestTable2(p_datetime TIMESTAMP) AS
-        v_file_handle UTL_FILE.FILE_TYPE;
-        report VARCHAR2(4000);
-        title VARCHAR2(100);
-        insert_count NUMBER;
-        update_count NUMBER;
-        delete_count NUMBER;
-        result VARCHAR(4000);
-    BEGIN
-        title := 'TestTable2 since ' || p_datetime;
-        SELECT COUNT(*) INTO insert_count FROM LoggingForTestTable2 WHERE operation = 'INSERT' AND p_datetime <= datetime;
-        SELECT COUNT(*) INTO update_count FROM LoggingForTestTable2 WHERE operation = 'UPDATE' AND p_datetime <= datetime;
-        SELECT COUNT(*) INTO delete_count FROM LoggingForTestTable2 WHERE operation = 'DELETE' AND p_datetime <= datetime;
-
-        result := create_report(title, insert_count, update_count, delete_count);
-
-        v_file_handle := UTL_FILE.FOPEN('MY_DIRECTORY', 'report.html', 'W');
-        UTL_FILE.PUT_LINE(v_file_handle, result);
-        UTL_FILE.FCLOSE(v_file_handle);
-    END create_report_for_TestTable2;
-
-    PROCEDURE create_report_for_TestTable2 AS
-        v_file_handle UTL_FILE.FILE_TYPE;
-        v_file_text CLOB;
-        v_pattern VARCHAR2(100) := 'since ([^<]+)';
-        v_match VARCHAR2(100);
-        v_line_number NUMBER := 1;
-    BEGIN
-        v_file_handle := UTL_FILE.FOPEN('MY_DIRECTORY', 'report.html', 'r');    
-        LOOP
-            UTL_FILE.GET_LINE(v_file_handle, v_file_text);
-            IF v_line_number = 23 THEN
-                EXIT;
-            END IF;
-            v_line_number := v_line_number + 1;
-        END LOOP;  
-        UTL_FILE.FCLOSE(v_file_handle);
-        
-        v_match := REGEXP_SUBSTR(v_file_text, v_pattern, 1, 1, NULL, 1);
-        create_report_for_TestTable2(v_match);
-    END create_report_for_TestTable2;
-
-
-    PROCEDURE create_report_for_TestTable3(p_datetime TIMESTAMP) AS
-        v_file_handle UTL_FILE.FILE_TYPE;
-        report VARCHAR2(4000);
-        title VARCHAR2(100);
-        insert_count NUMBER;
-        update_count NUMBER;
-        delete_count NUMBER;
-        result VARCHAR(4000);
-    BEGIN
-        title := 'TestTable3 since ' || p_datetime;
-        SELECT COUNT(*) INTO insert_count FROM LoggingForTestTable3 WHERE operation = 'INSERT' AND p_datetime <= datetime;
-        SELECT COUNT(*) INTO update_count FROM LoggingForTestTable3 WHERE operation = 'UPDATE' AND p_datetime <= datetime;
-        SELECT COUNT(*) INTO delete_count FROM LoggingForTestTable3 WHERE operation = 'DELETE' AND p_datetime <= datetime;
-
-        result := create_report(title, insert_count, update_count, delete_count);
-
-        v_file_handle := UTL_FILE.FOPEN('MY_DIRECTORY', 'report.html', 'W');
-        UTL_FILE.PUT_LINE(v_file_handle, result);
-        UTL_FILE.FCLOSE(v_file_handle);
-    END create_report_for_TestTable3;
-
-    PROCEDURE create_report_for_TestTable3 AS
-        v_file_handle UTL_FILE.FILE_TYPE;
-        v_file_text CLOB;
-        v_pattern VARCHAR2(100) := 'since ([^<]+)';
-        v_match VARCHAR2(100);
-        v_line_number NUMBER := 1;
-    BEGIN
-        v_file_handle := UTL_FILE.FOPEN('MY_DIRECTORY', 'report.html', 'r');  
-        LOOP
-            UTL_FILE.GET_LINE(v_file_handle, v_file_text);
-            IF v_line_number = 23 THEN
-                EXIT;
-            END IF;
-            v_line_number := v_line_number + 1;
-        END LOOP;  
-        UTL_FILE.FCLOSE(v_file_handle);
-        
-        v_match := REGEXP_SUBSTR(v_file_text, v_pattern, 1, 1, NULL, 1);
-        create_report_for_TestTable3(v_match);
-    END create_report_for_TestTable3;
+        create_report_for_TestTable(v_match);
+    END create_report_for_TestTable;
 END create_report_package;
 /
 
 
 -- for testing
 BEGIN
-    INSERT INTO TestTable1 VALUES (1, 'test1.1', 11);
-    INSERT INTO TestTable1 VALUES (2, 'test1.2', 11);
-    INSERT INTO TestTable1 VALUES (3, 'test1.3', 11);
-    INSERT INTO TestTable1 VALUES (4, 'test1.4', 11);
+    INSERT INTO TestTable1 VALUES (1, 'first test table 1', 11);
+    INSERT INTO TestTable1 VALUES (2, 'second test table 1', 11);
+    INSERT INTO TestTable1 VALUES (3, 'third test table 1', 11);
+    INSERT INTO TestTable1 VALUES (4, 'forth test table 1', 11);
 
     UPDATE TestTable1
     SET value = 12
@@ -495,39 +475,41 @@ BEGIN
 END;
 /
 
+-- время перед операцией удаления 
 BEGIN
     restore_package.restore_data_in_TestTable1('16.04.24 08:16:56,307977000');
 END;
 /
 
+-- время перед операцией обновления 
 BEGIN
     restore_package.restore_data_in_TestTable1(INTERVAL '0 00:01:40.000000' DAY TO SECOND);
 END;
 /
 
+-- время перед операцией вставки 
 BEGIN
-    create_report_package.create_report_for_TestTable1('15.04.24 20:38:09,819437000');
+    create_report_package.create_report_for_TestTable('01.05.24 12:32:00,819437000');
 END;
 /
 
 BEGIN
-    INSERT INTO TestTable1 VALUES (5, 'test1.5', 11);
-    create_report_package.create_report_for_TestTable1;
+    create_report_package.create_report_for_TestTable;
 END;
 /
 
 
 BEGIN
-    INSERT INTO TestTable2 VALUES (1, 'test1.1', '15.04.24 20:38:09,819437000');
-    INSERT INTO TestTable2 VALUES (2, 'test1.2', '15.04.24 20:38:09,819437000');
-    INSERT INTO TestTable2 VALUES (3, 'test1.3', '15.04.24 20:38:09,819437000');
-    INSERT INTO TestTable2 VALUES (4, 'test1.4', '15.04.24 20:38:09,819437000');
+    INSERT INTO TestTable2 VALUES (1, 'first test table 2', '01.05.24 12:32:00,000000000');
+    INSERT INTO TestTable2 VALUES (2, 'second test table 2', '01.05.24 12:32:00,000000000');
+    INSERT INTO TestTable2 VALUES (3, 'third test table 2', '01.05.24 12:32:00,000000000');
+    INSERT INTO TestTable2 VALUES (4, 'forth test table 2', '01.05.24 12:32:00,000000000');
 
     UPDATE TestTable2
-    SET datetime = '15.04.24 20:39:09,819437000'
-    WHERE datetime = '15.04.24 20:38:09,819437000';
+    SET datetime = '01.05.24 12:33:00,000000000'
+    WHERE datetime = '01.05.24 12:32:00,000000000';
 
-    DELETE FROM TestTable2 WHERE datetime = '15.04.24 20:39:09,819437000';
+    DELETE FROM TestTable2 WHERE datetime = '01.05.24 12:33:00,819437000';
 END;
 /
 
@@ -542,20 +524,20 @@ END;
 /
 
 BEGIN
-    create_report_package.create_report_for_TestTable2('16.04.24 07:49:24,315889000');
+    create_report_package.create_report_for_TestTable('16.04.24 07:49:24,315889000');
 END;
 /
 
 BEGIN
-    INSERT INTO TestTable2 VALUES (5, 'test1.5', '15.04.24 20:38:09,819437000');
-    create_report_package.create_report_for_TestTable2;
+    INSERT INTO TestTable2 VALUES (5, 'test1.5', '01.05.24 12:32:00,819437000');
+    create_report_package.create_report_for_TestTable;
 END;
 /
 
 
 BEGIN
-    INSERT INTO TestTable2 VALUES (1, 'test1.1', '15.04.24 20:38:09,819437000');
-    INSERT INTO TestTable2 VALUES (2, 'test1.2', '15.04.24 20:38:09,819437000');
+    INSERT INTO TestTable2 VALUES (1, 'first test table 2', '01.05.24 12:32:00,819437000');
+    INSERT INTO TestTable2 VALUES (2, 'test1.2', '01.05.24 12:32:00,819437000');
 
     INSERT INTO TestTable3 VALUES (1, 'test1.1', 1);
     INSERT INTO TestTable3 VALUES (2, 'test1.2', 1);
@@ -581,13 +563,13 @@ END;
 /
 
 BEGIN
-    create_report_package.create_report_for_TestTable3('16.04.24 07:54:24,315889000');
+    create_report_package.create_report_for_TestTable('16.04.24 07:54:24,315889000');
 END;
 /
 
 BEGIN
     INSERT INTO TestTable3 VALUES (5, 'test1.5', 1);
-    create_report_package.create_report_for_TestTable3;
+    create_report_package.create_report_for_TestTable;
 END;
 /
 
